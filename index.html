@@ -50,7 +50,7 @@ h1 { font-size: 22px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
 .t1 .now-badge { background: var(--green); color: #000; }
 .t2 .now-badge { background: var(--amber); color: #000; }
 .t3 .now-badge { background: var(--red); color: #fff; }
-.sr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.sr { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
 .sc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
 .sc.m { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.04); }
 .lb { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
@@ -80,22 +80,34 @@ h1 { font-size: 22px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
 .cw { width: 100%; overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px; margin-bottom: 20px; }
 svg { display: block; width: 100%; }
 .tb { display: none; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
-.tb.a { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; }
+.tb.a { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; }
 .tl { font-size: 9px; color: var(--muted); font-weight: 600; letter-spacing: .08em; display: block; margin-bottom: 2px; }
 .tv { font-size: 13px; font-weight: 600; }
 .sb { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
 .sh { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .st { font-size: 14px; font-weight: 700; }
 .ab { background: rgba(34,197,94,.12); color: var(--green); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-.sg { display: grid; grid-template-columns: 70px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.sg { display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .sg:last-child { border-bottom: none; }
 .sd { font-size: 12px; font-weight: 700; color: var(--muted); }
 .si { font-size: 12px; color: var(--muted); }
 .sret { font-size: 12px; font-weight: 700; white-space: nowrap; }
 .hb { font-size: 11px; color: var(--muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); line-height: 1.6; }
 .ft { font-size: 10px; color: var(--muted); text-align: center; margin-top: 24px; }
+.info-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
+.info-toggle { width: 100%; background: none; border: none; color: var(--fg); cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; font-size: 13px; font-weight: 600; text-align: left; }
+.info-toggle:hover { background: rgba(148,163,184,.05); }
+.info-toggle span { color: var(--muted); font-size: 11px; font-weight: 400; }
+.info-body { display: none; padding: 0 18px 18px; }
+.info-body.open { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.info-card { background: var(--card2); border-radius: 8px; padding: 12px; }
+.info-card-title { font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+.info-card-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.info-card-signal { font-size: 10px; margin-top: 8px; padding: 3px 8px; border-radius: 4px; display: inline-block; font-weight: 600; }
+@media (max-width: 640px) { .info-body.open { grid-template-columns: 1fr; } }
+
 @media (max-width: 640px) {
-  .tranchen, .sr, .r-results { grid-template-columns: 1fr; }
+  .tranchen { grid-template-columns: 1fr; } .sr, .r-results { grid-template-columns: repeat(2, 1fr); }
   .sg { grid-template-columns: 60px 1fr; }
   .sret { display: none; }
   .tb.a { grid-template-columns: repeat(3,1fr); }
@@ -109,128 +121,367 @@ const WORKER = 'https://signal-dashboard.blue-hill-33fd.workers.dev';
 const CACHE_MS = 5 * 60 * 1000;
 
 const TRANCHEN = [
-  { nr:1, pct:20, cls:'t1', spDD:-5,  vixMin:25, fgMax:25, desc:'Erste Investition – Korrektur beginnt' },
-  { nr:2, pct:40, cls:'t2', spDD:-10, vixMin:30, fgMax:10, desc:'Aufstocken – deutliche Korrektur' },
-  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  desc:'Vollinvestition – Panik am Markt' },
+  { nr:1, pct:20, cls:'t1', spDD:-10, vixMin:25, fgMax:25, hysMin:4.0, pcrMin:0.75, desc:'Erste Investition – Korrektur beginnt' },
+  { nr:2, pct:40, cls:'t2', spDD:-15, vixMin:30, fgMax:10, hysMin:5.0, pcrMin:0.90, desc:'Aufstocken – deutliche Korrektur' },
+  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  hysMin:6.0, pcrMin:1.05, desc:'Vollinvestition – Panik am Markt' },
 ];
 
 const H_DATA = [
-  // 2012 (S&P Monatskurse, VIX Monatsdurchschnitt, F&G rekonstruiert)
-  {d:"2012-01",fg:52,vix:21.3,sp:1301},{d:"2012-02",fg:62,vix:18.0,sp:1352},
-  {d:"2012-03",fg:68,vix:15.5,sp:1389},{d:"2012-04",fg:42,vix:17.5,sp:1386},
-  {d:"2012-05",fg:12,vix:25.5,sp:1341},{d:"2012-06",fg:35,vix:19.0,sp:1323},
-  {d:"2012-07",fg:48,vix:16.5,sp:1360},{d:"2012-08",fg:60,vix:14.7,sp:1403},
-  {d:"2012-09",fg:65,vix:14.6,sp:1443},{d:"2012-10",fg:45,vix:18.6,sp:1438},
-  {d:"2012-11",fg:50,vix:16.5,sp:1395},{d:"2012-12",fg:55,vix:18.0,sp:1422},
-  // 2013
-  {d:"2013-01",fg:70,vix:14.7,sp:1480},{d:"2013-02",fg:65,vix:14.9,sp:1512},
-  {d:"2013-03",fg:72,vix:13.5,sp:1551},{d:"2013-04",fg:76,vix:13.5,sp:1571},
-  {d:"2013-05",fg:78,vix:13.1,sp:1640},{d:"2013-06",fg:38,vix:20.5,sp:1619},
-  {d:"2013-07",fg:68,vix:12.0,sp:1669},{d:"2013-08",fg:32,vix:17.0,sp:1670},
-  {d:"2013-09",fg:62,vix:14.9,sp:1687},{d:"2013-10",fg:74,vix:13.7,sp:1720},
-  {d:"2013-11",fg:76,vix:12.4,sp:1784},{d:"2013-12",fg:80,vix:13.7,sp:1808},
-  // 2014
-  {d:"2014-01",fg:42,vix:18.4,sp:1822},{d:"2014-02",fg:60,vix:14.5,sp:1817},
-  {d:"2014-03",fg:58,vix:14.4,sp:1864},{d:"2014-04",fg:48,vix:14.6,sp:1864},
-  {d:"2014-05",fg:62,vix:11.9,sp:1890},{d:"2014-06",fg:68,vix:10.6,sp:1947},
-  {d:"2014-07",fg:45,vix:16.9,sp:1973},{d:"2014-08",fg:65,vix:12.1,sp:1962},
-  {d:"2014-09",fg:42,vix:16.3,sp:1993},{d:"2014-10",fg:18,vix:31.1,sp:1937},
-  {d:"2014-11",fg:68,vix:13.3,sp:2045},{d:"2014-12",fg:48,vix:19.2,sp:2054},
-  // 2015
-  {d:"2015-01",fg:42,vix:20.1,sp:2028},{d:"2015-02",fg:68,vix:14.7,sp:2082},
-  {d:"2015-03",fg:52,vix:15.6,sp:2080},{d:"2015-04",fg:62,vix:13.8,sp:2095},
-  {d:"2015-05",fg:60,vix:13.1,sp:2112},{d:"2015-06",fg:32,vix:18.9,sp:2099},
-  {d:"2015-07",fg:50,vix:18.0,sp:2094},{d:"2015-08",fg:8,vix:40.7,sp:2040},
-  {d:"2015-09",fg:10,vix:27.6,sp:1944},{d:"2015-10",fg:52,vix:17.1,sp:2025},
-  {d:"2015-11",fg:42,vix:16.3,sp:2081},{d:"2015-12",fg:28,vix:18.2,sp:2054},
-  // 2016
-  {d:"2016-01",fg:10,vix:28.1,sp:1919},{d:"2016-02",fg:18,vix:24.2,sp:1904},
-  {d:"2016-03",fg:52,vix:15.7,sp:2022},{d:"2016-04",fg:58,vix:15.9,sp:2076},
-  {d:"2016-05",fg:55,vix:14.2,sp:2066},{d:"2016-06",fg:22,vix:26.7,sp:2084},
-  {d:"2016-07",fg:68,vix:12.0,sp:2149},{d:"2016-08",fg:72,vix:11.5,sp:2171},
-  {d:"2016-09",fg:60,vix:13.3,sp:2158},{d:"2016-10",fg:38,vix:17.1,sp:2143},
-  {d:"2016-11",fg:70,vix:14.2,sp:2165},{d:"2016-12",fg:72,vix:14.0,sp:2247},
-  // 2017
-  {d:"2017-01",fg:68,vix:11.6,sp:2275},{d:"2017-02",fg:75,vix:11.6,sp:2330},
-  {d:"2017-03",fg:62,vix:12.0,sp:2367},{d:"2017-04",fg:65,vix:10.8,sp:2359},
-  {d:"2017-05",fg:70,vix:10.4,sp:2395},{d:"2017-06",fg:62,vix:11.2,sp:2434},
-  {d:"2017-07",fg:68,vix:10.3,sp:2454},{d:"2017-08",fg:55,vix:12.3,sp:2456},
-  {d:"2017-09",fg:68,vix:10.0,sp:2493},{d:"2017-10",fg:78,vix:10.2,sp:2557},
-  {d:"2017-11",fg:72,vix:11.4,sp:2594},{d:"2017-12",fg:75,vix:11.1,sp:2664},
-  // 2018–2026
-  {d:"2018-01",fg:73,vix:11,sp:2824},{d:"2018-02",fg:8,vix:33.5,sp:2714},
-  {d:"2018-03",fg:14,vix:24.9,sp:2641},{d:"2018-04",fg:35,vix:15.9,sp:2648},
-  {d:"2018-05",fg:45,vix:13.4,sp:2705},{d:"2018-06",fg:50,vix:12.4,sp:2718},
-  {d:"2018-07",fg:58,vix:12.8,sp:2816},{d:"2018-08",fg:55,vix:12.8,sp:2901},
-  {d:"2018-09",fg:60,vix:12.1,sp:2914},{d:"2018-10",fg:12,vix:24.8,sp:2712},
-  {d:"2018-11",fg:18,vix:20.8,sp:2760},{d:"2018-12",fg:3,vix:36.1,sp:2507},
-  {d:"2019-01",fg:45,vix:17.8,sp:2704},{d:"2019-02",fg:60,vix:14.8,sp:2784},
-  {d:"2019-03",fg:48,vix:16.5,sp:2834},{d:"2019-04",fg:68,vix:13.1,sp:2946},
-  {d:"2019-05",fg:25,vix:18.7,sp:2752},{d:"2019-06",fg:70,vix:13.3,sp:2942},
-  {d:"2019-07",fg:62,vix:16.1,sp:2980},{d:"2019-08",fg:22,vix:24.6,sp:2878},
-  {d:"2019-09",fg:65,vix:15.3,sp:2976},{d:"2019-10",fg:72,vix:13.2,sp:3038},
-  {d:"2019-11",fg:85,vix:12,sp:3141},{d:"2019-12",fg:93,vix:12.5,sp:3231},
-  {d:"2020-01",fg:60,vix:18.8,sp:3225},{d:"2020-02",fg:25,vix:40.1,sp:2954},
-  {d:"2020-03",fg:2,vix:82.7,sp:2585},{d:"2020-04",fg:38,vix:34.2,sp:2912},
-  {d:"2020-05",fg:52,vix:27.5,sp:3044},{d:"2020-06",fg:55,vix:30.4,sp:3100},
-  {d:"2020-07",fg:60,vix:24.5,sp:3271},{d:"2020-08",fg:72,vix:22.6,sp:3500},
-  {d:"2020-09",fg:50,vix:26.4,sp:3363},{d:"2020-10",fg:38,vix:27.6,sp:3270},
-  {d:"2020-11",fg:90,vix:20.6,sp:3622},{d:"2020-12",fg:84,vix:22.8,sp:3756},
-  {d:"2021-01",fg:55,vix:33.1,sp:3714},{d:"2021-02",fg:60,vix:22.8,sp:3811},
-  {d:"2021-03",fg:52,vix:19.4,sp:3973},{d:"2021-04",fg:58,vix:17.3,sp:4181},
-  {d:"2021-05",fg:42,vix:18.8,sp:4204},{d:"2021-06",fg:48,vix:15.6,sp:4298},
-  {d:"2021-07",fg:30,vix:22,sp:4395},{d:"2021-08",fg:40,vix:16.5,sp:4523},
-  {d:"2021-09",fg:28,vix:23.1,sp:4308},{d:"2021-10",fg:65,vix:16.3,sp:4605},
-  {d:"2021-11",fg:35,vix:27.2,sp:4567},{d:"2021-12",fg:42,vix:17.2,sp:4766},
-  {d:"2022-01",fg:30,vix:24.8,sp:4516},{d:"2022-02",fg:25,vix:30.1,sp:4374},
-  {d:"2022-03",fg:28,vix:28.6,sp:4530},{d:"2022-04",fg:35,vix:33.4,sp:4132},
-  {d:"2022-05",fg:15,vix:29.3,sp:4132},{d:"2022-06",fg:14,vix:34.6,sp:3785},
-  {d:"2022-07",fg:42,vix:22,sp:4130},{d:"2022-08",fg:38,vix:25.9,sp:3955},
-  {d:"2022-09",fg:18,vix:32.6,sp:3586},{d:"2022-10",fg:45,vix:25.6,sp:3872},
-  {d:"2022-11",fg:55,vix:21.2,sp:4080},{d:"2022-12",fg:35,vix:21.7,sp:3840},
-  {d:"2023-01",fg:55,vix:19.4,sp:4077},{d:"2023-02",fg:62,vix:20.7,sp:3970},
-  {d:"2023-03",fg:32,vix:26.5,sp:4109},{d:"2023-04",fg:55,vix:15.8,sp:4169},
-  {d:"2023-05",fg:65,vix:17,sp:4205},{d:"2023-06",fg:75,vix:13.6,sp:4450},
-  {d:"2023-07",fg:80,vix:13.3,sp:4589},{d:"2023-08",fg:48,vix:17.1,sp:4508},
-  {d:"2023-09",fg:30,vix:17.5,sp:4288},{d:"2023-10",fg:25,vix:21.3,sp:4194},
-  {d:"2023-11",fg:62,vix:13.1,sp:4568},{d:"2023-12",fg:75,vix:12.5,sp:4770},
-  {d:"2024-01",fg:72,vix:13.3,sp:4890},{d:"2024-02",fg:75,vix:13.7,sp:5096},
-  {d:"2024-03",fg:70,vix:13,sp:5254},{d:"2024-04",fg:35,vix:19.2,sp:5036},
-  {d:"2024-05",fg:52,vix:12.9,sp:5277},{d:"2024-06",fg:55,vix:12.3,sp:5460},
-  {d:"2024-07",fg:52,vix:18.1,sp:5522},{d:"2024-08",fg:28,vix:38.6,sp:5346},
-  {d:"2024-09",fg:65,vix:16.7,sp:5762},{d:"2024-10",fg:60,vix:20,sp:5705},
-  {d:"2024-11",fg:65,vix:14.2,sp:6032},{d:"2024-12",fg:32,vix:17.4,sp:5881},
-  {d:"2025-01",fg:48,vix:16.4,sp:6041},{d:"2025-02",fg:25,vix:19.6,sp:5955},
-  {d:"2025-03",fg:8,vix:29,sp:5580},{d:"2025-04",fg:4,vix:52.3,sp:5074},
-  {d:"2025-05",fg:40,vix:22.5,sp:5686},{d:"2025-06",fg:55,vix:16.8,sp:5950},
-  {d:"2025-07",fg:62,vix:15.5,sp:6100},{d:"2025-08",fg:58,vix:16.2,sp:6202},
-  {d:"2025-09",fg:50,vix:17.8,sp:6350},{d:"2025-10",fg:45,vix:19.5,sp:6480},
-  {d:"2025-11",fg:55,vix:16.1,sp:6620},{d:"2025-12",fg:48,vix:17.9,sp:6850},
-  {d:"2026-01",fg:55,vix:16,sp:7002},{d:"2026-02",fg:35,vix:19.8,sp:6780},
-  {d:"2026-03",fg:25,vix:25.7,sp:6776},
+  {d:"2000-01",fg:75,vix:24.2,sp:1394,hys:4.78,pcr:0.68},
+  {d:"2000-02",fg:70,vix:26.1,sp:1366,hys:4.9,pcr:0.65},
+  {d:"2000-03",fg:72,vix:26.8,sp:1499,hys:5.37,pcr:0.62},
+  {d:"2000-04",fg:45,vix:23.2,sp:1452,hys:5.85,pcr:0.75},
+  {d:"2000-05",fg:38,vix:20.8,sp:1421,hys:5.9,pcr:0.78},
+  {d:"2000-06",fg:55,vix:23.5,sp:1455,hys:6.14,pcr:0.72},
+  {d:"2000-07",fg:48,vix:20.4,sp:1431,hys:6.12,pcr:0.7},
+  {d:"2000-08",fg:52,vix:20.5,sp:1517,hys:6.36,pcr:0.68},
+  {d:"2000-09",fg:35,vix:22.8,sp:1448,hys:6.45,pcr:0.78},
+  {d:"2000-10",fg:25,vix:28.3,sp:1363,hys:7.29,pcr:0.88},
+  {d:"2000-11",fg:20,vix:27.2,sp:1315,hys:8.09,pcr:0.92},
+  {d:"2000-12",fg:28,vix:24.4,sp:1321,hys:9.01,pcr:0.85},
+  {d:"2001-01",fg:45,vix:26.5,sp:1366,hys:8.46,pcr:0.82},
+  {d:"2001-02",fg:32,vix:25.4,sp:1240,hys:7.61,pcr:0.88},
+  {d:"2001-03",fg:15,vix:28.5,sp:1160,hys:7.92,pcr:0.95},
+  {d:"2001-04",fg:52,vix:24.4,sp:1249,hys:8.5,pcr:0.8},
+  {d:"2001-05",fg:55,vix:21.2,sp:1255,hys:7.69,pcr:0.75},
+  {d:"2001-06",fg:38,vix:23.0,sp:1224,hys:8.06,pcr:0.8},
+  {d:"2001-07",fg:30,vix:23.8,sp:1211,hys:8.26,pcr:0.85},
+  {d:"2001-08",fg:22,vix:24.2,sp:1148,hys:8.05,pcr:0.88},
+  {d:"2001-09",fg:5,vix:38.5,sp:1040,hys:9.24,pcr:1.1},
+  {d:"2001-10",fg:18,vix:35.6,sp:1060,hys:9.8,pcr:1.05},
+  {d:"2001-11",fg:38,vix:28.5,sp:1139,hys:8.79,pcr:0.9},
+  {d:"2001-12",fg:50,vix:23.0,sp:1148,hys:8.29,pcr:0.82},
+  {d:"2002-01",fg:52,vix:22.2,sp:1130,hys:8.15,pcr:0.82},
+  {d:"2002-02",fg:45,vix:22.5,sp:1107,hys:8.1,pcr:0.85},
+  {d:"2002-03",fg:55,vix:20.8,sp:1147,hys:7.33,pcr:0.78},
+  {d:"2002-04",fg:42,vix:20.8,sp:1074,hys:7.16,pcr:0.82},
+  {d:"2002-05",fg:38,vix:21.0,sp:1067,hys:7.03,pcr:0.88},
+  {d:"2002-06",fg:18,vix:26.0,sp:990,hys:7.98,pcr:0.98},
+  {d:"2002-07",fg:8,vix:38.5,sp:862,hys:9.36,pcr:1.05},
+  {d:"2002-08",fg:15,vix:32.2,sp:917,hys:9.79,pcr:1.02},
+  {d:"2002-09",fg:5,vix:40.5,sp:815,hys:9.85,pcr:1.12},
+  {d:"2002-10",fg:20,vix:38.0,sp:885,hys:10.68,pcr:1.08},
+  {d:"2002-11",fg:35,vix:27.2,sp:936,hys:9.65,pcr:0.95},
+  {d:"2002-12",fg:20,vix:27.5,sp:879,hys:8.96,pcr:0.92},
+  {d:"2003-01",fg:22,vix:27.2,sp:896,hys:8.18,pcr:0.92},
+  {d:"2003-02",fg:18,vix:30.5,sp:841,hys:8.43,pcr:0.98},
+  {d:"2003-03",fg:15,vix:32.8,sp:800,hys:8.04,pcr:1.02},
+  {d:"2003-04",fg:45,vix:25.8,sp:880,hys:7.02,pcr:0.88},
+  {d:"2003-05",fg:55,vix:21.2,sp:929,hys:6.64,pcr:0.78},
+  {d:"2003-06",fg:58,vix:20.0,sp:975,hys:6.34,pcr:0.72},
+  {d:"2003-07",fg:62,vix:18.5,sp:990,hys:5.86,pcr:0.68},
+  {d:"2003-08",fg:65,vix:18.5,sp:1008,hys:5.82,pcr:0.65},
+  {d:"2003-09",fg:58,vix:18.5,sp:996,hys:5.36,pcr:0.68},
+  {d:"2003-10",fg:65,vix:16.5,sp:1050,hys:4.92,pcr:0.65},
+  {d:"2003-11",fg:70,vix:15.8,sp:1058,hys:4.62,pcr:0.62},
+  {d:"2003-12",fg:75,vix:15.5,sp:1112,hys:4.28,pcr:0.6},
+  {d:"2004-01",fg:72,vix:15.2,sp:1132,hys:3.94,pcr:0.62},
+  {d:"2004-02",fg:68,vix:14.8,sp:1145,hys:4.26,pcr:0.6},
+  {d:"2004-03",fg:62,vix:16.5,sp:1126,hys:4.4,pcr:0.65},
+  {d:"2004-04",fg:52,vix:15.8,sp:1108,hys:3.98,pcr:0.68},
+  {d:"2004-05",fg:48,vix:15.5,sp:1121,hys:4.25,pcr:0.65},
+  {d:"2004-06",fg:55,vix:16.5,sp:1141,hys:4.07,pcr:0.62},
+  {d:"2004-07",fg:48,vix:16.0,sp:1102,hys:4.01,pcr:0.65},
+  {d:"2004-08",fg:50,vix:14.5,sp:1104,hys:4.08,pcr:0.62},
+  {d:"2004-09",fg:52,vix:14.2,sp:1115,hys:3.87,pcr:0.6},
+  {d:"2004-10",fg:58,vix:14.5,sp:1130,hys:3.73,pcr:0.62},
+  {d:"2004-11",fg:65,vix:13.5,sp:1174,hys:3.29,pcr:0.6},
+  {d:"2004-12",fg:70,vix:13.2,sp:1212,hys:3.1,pcr:0.58},
+  {d:"2005-01",fg:60,vix:13.2,sp:1181,hys:3.2,pcr:0.6},
+  {d:"2005-02",fg:62,vix:12.5,sp:1203,hys:3.05,pcr:0.58},
+  {d:"2005-03",fg:55,vix:13.0,sp:1181,hys:2.98,pcr:0.62},
+  {d:"2005-04",fg:42,vix:14.5,sp:1156,hys:3.78,pcr:0.68},
+  {d:"2005-05",fg:50,vix:13.5,sp:1191,hys:4.23,pcr:0.65},
+  {d:"2005-06",fg:52,vix:12.5,sp:1191,hys:3.9,pcr:0.62},
+  {d:"2005-07",fg:60,vix:12.0,sp:1235,hys:3.49,pcr:0.58},
+  {d:"2005-08",fg:62,vix:12.0,sp:1220,hys:3.52,pcr:0.58},
+  {d:"2005-09",fg:55,vix:14.5,sp:1228,hys:3.47,pcr:0.6},
+  {d:"2005-10",fg:42,vix:16.5,sp:1207,hys:3.57,pcr:0.65},
+  {d:"2005-11",fg:55,vix:12.8,sp:1249,hys:3.37,pcr:0.62},
+  {d:"2005-12",fg:62,vix:12.0,sp:1248,hys:3.16,pcr:0.6},
+  {d:"2006-01",fg:68,vix:12.5,sp:1280,hys:3.17,pcr:0.6},
+  {d:"2006-02",fg:65,vix:11.5,sp:1281,hys:2.99,pcr:0.58},
+  {d:"2006-03",fg:70,vix:11.8,sp:1294,hys:3.01,pcr:0.6},
+  {d:"2006-04",fg:72,vix:12.5,sp:1310,hys:3.04,pcr:0.62},
+  {d:"2006-05",fg:38,vix:17.5,sp:1270,hys:3.4,pcr:0.72},
+  {d:"2006-06",fg:42,vix:17.5,sp:1270,hys:3.37,pcr:0.75},
+  {d:"2006-07",fg:52,vix:16.0,sp:1304,hys:3.12,pcr:0.68},
+  {d:"2006-08",fg:65,vix:12.5,sp:1304,hys:2.96,pcr:0.62},
+  {d:"2006-09",fg:68,vix:11.5,sp:1336,hys:2.88,pcr:0.58},
+  {d:"2006-10",fg:72,vix:11.0,sp:1377,hys:2.8,pcr:0.56},
+  {d:"2006-11",fg:68,vix:11.5,sp:1401,hys:2.73,pcr:0.58},
+  {d:"2006-12",fg:70,vix:11.0,sp:1418,hys:2.72,pcr:0.56},
+  {d:"2007-01",fg:72,vix:10.8,sp:1438,hys:2.65,pcr:0.56},
+  {d:"2007-02",fg:65,vix:11.5,sp:1407,hys:2.56,pcr:0.58},
+  {d:"2007-03",fg:60,vix:14.5,sp:1421,hys:2.6,pcr:0.65},
+  {d:"2007-04",fg:68,vix:13.0,sp:1482,hys:2.55,pcr:0.6},
+  {d:"2007-05",fg:72,vix:12.5,sp:1531,hys:2.54,pcr:0.58},
+  {d:"2007-06",fg:55,vix:16.0,sp:1503,hys:2.85,pcr:0.68},
+  {d:"2007-07",fg:55,vix:20.5,sp:1455,hys:3.56,pcr:0.75},
+  {d:"2007-08",fg:30,vix:30.0,sp:1474,hys:4.0,pcr:0.85},
+  {d:"2007-09",fg:45,vix:20.0,sp:1527,hys:3.83,pcr:0.72},
+  {d:"2007-10",fg:62,vix:18.0,sp:1549,hys:3.55,pcr:0.68},
+  {d:"2007-11",fg:25,vix:26.0,sp:1481,hys:4.34,pcr:0.82},
+  {d:"2007-12",fg:28,vix:22.5,sp:1468,hys:5.01,pcr:0.88},
+  {d:"2008-01",fg:15,vix:26.5,sp:1378,hys:5.99,pcr:0.92},
+  {d:"2008-02",fg:18,vix:25.0,sp:1330,hys:6.22,pcr:0.88},
+  {d:"2008-03",fg:12,vix:28.0,sp:1323,hys:6.78,pcr:0.95},
+  {d:"2008-04",fg:38,vix:20.5,sp:1385,hys:6.23,pcr:0.78},
+  {d:"2008-05",fg:48,vix:18.5,sp:1400,hys:5.98,pcr:0.72},
+  {d:"2008-06",fg:15,vix:23.0,sp:1280,hys:6.82,pcr:0.88},
+  {d:"2008-07",fg:10,vix:24.5,sp:1267,hys:7.32,pcr:0.9},
+  {d:"2008-08",fg:18,vix:21.0,sp:1283,hys:7.05,pcr:0.82},
+  {d:"2008-09",fg:5,vix:36.2,sp:1166,hys:8.34,pcr:1.02},
+  {d:"2008-10",fg:2,vix:59.9,sp:968,hys:14.44,pcr:1.25},
+  {d:"2008-11",fg:5,vix:65.0,sp:896,hys:16.81,pcr:1.18},
+  {d:"2008-12",fg:8,vix:45.0,sp:903,hys:18.7,pcr:1.1},
+  {d:"2009-01",fg:5,vix:44.2,sp:931,hys:17.71,pcr:1.08},
+  {d:"2009-02",fg:3,vix:46.0,sp:826,hys:17.32,pcr:1.12},
+  {d:"2009-03",fg:8,vix:42.0,sp:798,hys:16.22,pcr:1.05},
+  {d:"2009-04",fg:35,vix:35.0,sp:873,hys:13.09,pcr:0.88},
+  {d:"2009-05",fg:48,vix:28.0,sp:919,hys:11.17,pcr:0.78},
+  {d:"2009-06",fg:42,vix:26.5,sp:920,hys:9.67,pcr:0.75},
+  {d:"2009-07",fg:55,vix:24.5,sp:987,hys:8.5,pcr:0.7},
+  {d:"2009-08",fg:60,vix:25.0,sp:1021,hys:7.76,pcr:0.65},
+  {d:"2009-09",fg:65,vix:23.5,sp:1057,hys:7.2,pcr:0.68},
+  {d:"2009-10",fg:58,vix:22.5,sp:1036,hys:6.81,pcr:0.7},
+  {d:"2009-11",fg:62,vix:21.5,sp:1096,hys:6.58,pcr:0.65},
+  {d:"2009-12",fg:68,vix:21.5,sp:1115,hys:6.31,pcr:0.62},
+  {d:"2010-01",fg:55,vix:22.5,sp:1074,hys:6.28,pcr:0.68},
+  {d:"2010-02",fg:55,vix:20.5,sp:1144,hys:6.2,pcr:0.65},
+  {d:"2010-03",fg:62,vix:17.5,sp:1170,hys:5.8,pcr:0.62},
+  {d:"2010-04",fg:68,vix:16.5,sp:1187,hys:5.44,pcr:0.6},
+  {d:"2010-05",fg:28,vix:22.0,sp:1089,hys:6.18,pcr:0.75},
+  {d:"2010-06",fg:30,vix:25.0,sp:1030,hys:6.69,pcr:0.78},
+  {d:"2010-07",fg:45,vix:24.0,sp:1102,hys:6.31,pcr:0.72},
+  {d:"2010-08",fg:38,vix:23.5,sp:1049,hys:5.93,pcr:0.7},
+  {d:"2010-09",fg:55,vix:22.0,sp:1141,hys:5.65,pcr:0.65},
+  {d:"2010-10",fg:65,vix:19.5,sp:1183,hys:5.28,pcr:0.62},
+  {d:"2010-11",fg:55,vix:18.5,sp:1198,hys:5.47,pcr:0.68},
+  {d:"2010-12",fg:68,vix:17.5,sp:1258,hys:5.13,pcr:0.62},
+  {d:"2011-01",fg:68,vix:16.5,sp:1282,hys:4.97,pcr:0.62},
+  {d:"2011-02",fg:70,vix:15.5,sp:1286,hys:4.84,pcr:0.6},
+  {d:"2011-03",fg:65,vix:18.0,sp:1304,hys:4.74,pcr:0.62},
+  {d:"2011-04",fg:68,vix:15.5,sp:1363,hys:4.54,pcr:0.6},
+  {d:"2011-05",fg:55,vix:16.5,sp:1345,hys:4.68,pcr:0.62},
+  {d:"2011-06",fg:45,vix:18.0,sp:1320,hys:4.89,pcr:0.68},
+  {d:"2011-07",fg:35,vix:22.0,sp:1292,hys:5.11,pcr:0.75},
+  {d:"2011-08",fg:8,vix:35.0,sp:1218,hys:6.11,pcr:0.98},
+  {d:"2011-09",fg:5,vix:34.0,sp:1131,hys:6.97,pcr:1.05},
+  {d:"2011-10",fg:42,vix:25.0,sp:1253,hys:6.38,pcr:0.88},
+  {d:"2011-11",fg:22,vix:30.0,sp:1247,hys:7.01,pcr:0.92},
+  {d:"2011-12",fg:28,vix:23.5,sp:1258,hys:7.07,pcr:0.88},
+  {d:"2012-01",fg:42,vix:20.0,sp:1312,hys:6.94,pcr:0.78},
+  {d:"2012-02",fg:62,vix:18.3,sp:1366,hys:6.7,pcr:0.7},
+  {d:"2012-03",fg:72,vix:15.5,sp:1408,hys:6.32,pcr:0.68},
+  {d:"2012-04",fg:62,vix:17.6,sp:1397,hys:6.37,pcr:0.72},
+  {d:"2012-05",fg:28,vix:23.0,sp:1310,hys:7.02,pcr:0.85},
+  {d:"2012-06",fg:38,vix:20.9,sp:1362,hys:6.68,pcr:0.78},
+  {d:"2012-07",fg:52,vix:17.0,sp:1380,hys:6.28,pcr:0.72},
+  {d:"2012-08",fg:62,vix:14.7,sp:1403,hys:5.95,pcr:0.68},
+  {d:"2012-09",fg:68,vix:14.6,sp:1440,hys:5.72,pcr:0.65},
+  {d:"2012-10",fg:52,vix:17.3,sp:1412,hys:5.68,pcr:0.7},
+  {d:"2012-11",fg:55,vix:15.9,sp:1416,hys:5.47,pcr:0.75},
+  {d:"2012-12",fg:65,vix:16.8,sp:1426,hys:5.3,pcr:0.8},
+  {d:"2013-01",fg:75,vix:13.3,sp:1498,hys:5.27,pcr:0.65},
+  {d:"2013-02",fg:72,vix:13.6,sp:1514,hys:5.04,pcr:0.62},
+  {d:"2013-03",fg:75,vix:13.7,sp:1569,hys:4.78,pcr:0.6},
+  {d:"2013-04",fg:78,vix:13.5,sp:1597,hys:4.75,pcr:0.62},
+  {d:"2013-05",fg:78,vix:13.3,sp:1631,hys:4.71,pcr:0.58},
+  {d:"2013-06",fg:52,vix:16.3,sp:1606,hys:5.34,pcr:0.72},
+  {d:"2013-07",fg:72,vix:13.5,sp:1686,hys:5.11,pcr:0.62},
+  {d:"2013-08",fg:55,vix:14.8,sp:1633,hys:5.36,pcr:0.68},
+  {d:"2013-09",fg:62,vix:14.3,sp:1682,hys:5.19,pcr:0.65},
+  {d:"2013-10",fg:75,vix:13.0,sp:1756,hys:4.87,pcr:0.6},
+  {d:"2013-11",fg:78,vix:12.7,sp:1806,hys:4.52,pcr:0.58},
+  {d:"2013-12",fg:82,vix:13.5,sp:1848,hys:4.23,pcr:0.58},
+  {d:"2014-01",fg:48,vix:16.4,sp:1782,hys:4.25,pcr:0.68},
+  {d:"2014-02",fg:65,vix:14.0,sp:1859,hys:4.01,pcr:0.65},
+  {d:"2014-03",fg:62,vix:14.1,sp:1872,hys:3.9,pcr:0.62},
+  {d:"2014-04",fg:62,vix:13.9,sp:1884,hys:3.96,pcr:0.68},
+  {d:"2014-05",fg:68,vix:12.0,sp:1924,hys:3.72,pcr:0.62},
+  {d:"2014-06",fg:72,vix:11.6,sp:1960,hys:3.58,pcr:0.6},
+  {d:"2014-07",fg:55,vix:13.5,sp:1931,hys:3.61,pcr:0.65},
+  {d:"2014-08",fg:72,vix:11.7,sp:2003,hys:3.63,pcr:0.62},
+  {d:"2014-09",fg:60,vix:14.2,sp:1972,hys:3.77,pcr:0.68},
+  {d:"2014-10",fg:32,vix:21.4,sp:2018,hys:4.52,pcr:0.88},
+  {d:"2014-11",fg:68,vix:13.3,sp:2068,hys:4.73,pcr:0.7},
+  {d:"2014-12",fg:58,vix:15.8,sp:2059,hys:5.21,pcr:0.72},
+  {d:"2015-01",fg:42,vix:20.0,sp:1995,hys:5.72,pcr:0.7},
+  {d:"2015-02",fg:70,vix:15.3,sp:2105,hys:5.43,pcr:0.65},
+  {d:"2015-03",fg:58,vix:15.1,sp:2068,hys:5.51,pcr:0.68},
+  {d:"2015-04",fg:62,vix:13.9,sp:2086,hys:5.14,pcr:0.65},
+  {d:"2015-05",fg:65,vix:13.1,sp:2107,hys:5.17,pcr:0.65},
+  {d:"2015-06",fg:52,vix:14.6,sp:2063,hys:5.52,pcr:0.72},
+  {d:"2015-07",fg:60,vix:12.6,sp:2104,hys:5.76,pcr:0.75},
+  {d:"2015-08",fg:22,vix:24.2,sp:1972,hys:6.35,pcr:0.95},
+  {d:"2015-09",fg:18,vix:24.5,sp:1920,hys:6.92,pcr:0.98},
+  {d:"2015-10",fg:52,vix:17.0,sp:2080,hys:6.43,pcr:0.82},
+  {d:"2015-11",fg:55,vix:16.4,sp:2080,hys:6.89,pcr:0.85},
+  {d:"2015-12",fg:38,vix:18.0,sp:2044,hys:7.29,pcr:0.88},
+  {d:"2016-01",fg:20,vix:22.0,sp:1940,hys:7.67,pcr:0.98},
+  {d:"2016-02",fg:22,vix:21.6,sp:1932,hys:7.99,pcr:1.02},
+  {d:"2016-03",fg:52,vix:16.5,sp:2060,hys:7.17,pcr:0.85},
+  {d:"2016-04",fg:58,vix:14.5,sp:2065,hys:6.46,pcr:0.78},
+  {d:"2016-05",fg:55,vix:14.2,sp:2097,hys:6.25,pcr:0.75},
+  {d:"2016-06",fg:35,vix:19.8,sp:2099,hys:6.4,pcr:0.88},
+  {d:"2016-07",fg:72,vix:13.0,sp:2174,hys:5.8,pcr:0.7},
+  {d:"2016-08",fg:75,vix:11.7,sp:2171,hys:5.44,pcr:0.65},
+  {d:"2016-09",fg:65,vix:13.2,sp:2168,hys:5.17,pcr:0.68},
+  {d:"2016-10",fg:45,vix:16.2,sp:2126,hys:4.81,pcr:0.72},
+  {d:"2016-11",fg:78,vix:14.2,sp:2198,hys:4.45,pcr:0.65},
+  {d:"2016-12",fg:82,vix:11.8,sp:2239,hys:4.15,pcr:0.62},
+  {d:"2017-01",fg:75,vix:11.6,sp:2279,hys:3.89,pcr:0.62},
+  {d:"2017-02",fg:80,vix:11.5,sp:2364,hys:3.74,pcr:0.58},
+  {d:"2017-03",fg:72,vix:11.3,sp:2363,hys:3.67,pcr:0.6},
+  {d:"2017-04",fg:70,vix:10.9,sp:2384,hys:3.65,pcr:0.58},
+  {d:"2017-05",fg:78,vix:10.4,sp:2412,hys:3.55,pcr:0.56},
+  {d:"2017-06",fg:68,vix:11.0,sp:2423,hys:3.64,pcr:0.6},
+  {d:"2017-07",fg:75,vix:10.3,sp:2470,hys:3.56,pcr:0.56},
+  {d:"2017-08",fg:62,vix:11.1,sp:2472,hys:3.55,pcr:0.6},
+  {d:"2017-09",fg:68,vix:10.2,sp:2519,hys:3.45,pcr:0.58},
+  {d:"2017-10",fg:78,vix:10.2,sp:2575,hys:3.38,pcr:0.55},
+  {d:"2017-11",fg:80,vix:11.3,sp:2648,hys:3.38,pcr:0.56},
+  {d:"2017-12",fg:75,vix:11.0,sp:2674,hys:3.47,pcr:0.58},
+  {d:"2018-01",fg:73,vix:11.0,sp:2824,hys:3.27,pcr:0.55},
+  {d:"2018-02",fg:8,vix:33.5,sp:2714,hys:3.49,pcr:0.78},
+  {d:"2018-03",fg:14,vix:24.9,sp:2641,hys:3.59,pcr:0.75},
+  {d:"2018-04",fg:35,vix:15.9,sp:2648,hys:3.52,pcr:0.72},
+  {d:"2018-05",fg:45,vix:13.4,sp:2705,hys:3.39,pcr:0.68},
+  {d:"2018-06",fg:50,vix:12.4,sp:2718,hys:3.42,pcr:0.68},
+  {d:"2018-07",fg:58,vix:12.8,sp:2816,hys:3.34,pcr:0.62},
+  {d:"2018-08",fg:55,vix:12.8,sp:2901,hys:3.22,pcr:0.6},
+  {d:"2018-09",fg:60,vix:12.1,sp:2914,hys:3.25,pcr:0.62},
+  {d:"2018-10",fg:12,vix:24.8,sp:2712,hys:3.67,pcr:0.85},
+  {d:"2018-11",fg:18,vix:20.8,sp:2760,hys:4.17,pcr:0.8},
+  {d:"2018-12",fg:3,vix:36.1,sp:2507,hys:5.02,pcr:0.98},
+  {d:"2019-01",fg:45,vix:17.8,sp:2704,hys:4.86,pcr:0.88},
+  {d:"2019-02",fg:60,vix:14.8,sp:2784,hys:4.58,pcr:0.72},
+  {d:"2019-03",fg:48,vix:16.5,sp:2834,hys:4.16,pcr:0.68},
+  {d:"2019-04",fg:68,vix:13.1,sp:2946,hys:3.88,pcr:0.62},
+  {d:"2019-05",fg:25,vix:18.7,sp:2752,hys:4.25,pcr:0.78},
+  {d:"2019-06",fg:70,vix:13.3,sp:2942,hys:3.99,pcr:0.7},
+  {d:"2019-07",fg:62,vix:16.1,sp:2980,hys:3.71,pcr:0.65},
+  {d:"2019-08",fg:22,vix:24.6,sp:2878,hys:3.78,pcr:0.75},
+  {d:"2019-09",fg:65,vix:15.3,sp:2976,hys:3.68,pcr:0.68},
+  {d:"2019-10",fg:72,vix:13.2,sp:3038,hys:3.56,pcr:0.65},
+  {d:"2019-11",fg:85,vix:12.0,sp:3141,hys:3.4,pcr:0.6},
+  {d:"2019-12",fg:93,vix:12.5,sp:3231,hys:3.29,pcr:0.58},
+  {d:"2020-01",fg:60,vix:18.8,sp:3225,hys:3.24,pcr:0.6},
+  {d:"2020-02",fg:25,vix:40.1,sp:2954,hys:4.52,pcr:0.85},
+  {d:"2020-03",fg:2,vix:82.7,sp:2585,hys:10.74,pcr:1.15},
+  {d:"2020-04",fg:38,vix:34.2,sp:2912,hys:8.51,pcr:0.95},
+  {d:"2020-05",fg:52,vix:27.5,sp:3044,hys:7.18,pcr:0.78},
+  {d:"2020-06",fg:55,vix:30.4,sp:3100,hys:6.29,pcr:0.72},
+  {d:"2020-07",fg:60,vix:24.5,sp:3271,hys:5.64,pcr:0.65},
+  {d:"2020-08",fg:72,vix:22.6,sp:3500,hys:4.97,pcr:0.58},
+  {d:"2020-09",fg:50,vix:26.4,sp:3363,hys:5.03,pcr:0.72},
+  {d:"2020-10",fg:38,vix:27.6,sp:3270,hys:5.09,pcr:0.8},
+  {d:"2020-11",fg:90,vix:20.6,sp:3622,hys:4.54,pcr:0.62},
+  {d:"2020-12",fg:84,vix:22.8,sp:3756,hys:4.22,pcr:0.58},
+  {d:"2021-01",fg:55,vix:33.1,sp:3714,hys:4.09,pcr:0.58},
+  {d:"2021-02",fg:60,vix:22.8,sp:3811,hys:3.94,pcr:0.6},
+  {d:"2021-03",fg:52,vix:19.4,sp:3973,hys:3.67,pcr:0.58},
+  {d:"2021-04",fg:58,vix:17.3,sp:4181,hys:3.43,pcr:0.55},
+  {d:"2021-05",fg:42,vix:18.8,sp:4204,hys:3.26,pcr:0.56},
+  {d:"2021-06",fg:48,vix:15.6,sp:4298,hys:3.27,pcr:0.55},
+  {d:"2021-07",fg:30,vix:22.0,sp:4395,hys:3.27,pcr:0.56},
+  {d:"2021-08",fg:40,vix:16.5,sp:4523,hys:3.07,pcr:0.54},
+  {d:"2021-09",fg:28,vix:23.1,sp:4308,hys:3.18,pcr:0.62},
+  {d:"2021-10",fg:65,vix:16.3,sp:4605,hys:3.09,pcr:0.55},
+  {d:"2021-11",fg:35,vix:27.2,sp:4567,hys:3.5,pcr:0.65},
+  {d:"2021-12",fg:42,vix:17.2,sp:4766,hys:3.32,pcr:0.6},
+  {d:"2022-01",fg:30,vix:24.8,sp:4516,hys:3.33,pcr:0.68},
+  {d:"2022-02",fg:25,vix:30.1,sp:4374,hys:3.52,pcr:0.72},
+  {d:"2022-03",fg:28,vix:28.6,sp:4530,hys:3.81,pcr:0.75},
+  {d:"2022-04",fg:35,vix:33.4,sp:4132,hys:4.04,pcr:0.8},
+  {d:"2022-05",fg:15,vix:29.3,sp:4132,hys:4.5,pcr:0.85},
+  {d:"2022-06",fg:14,vix:34.6,sp:3785,hys:5.57,pcr:0.95},
+  {d:"2022-07",fg:42,vix:22.0,sp:4130,hys:4.99,pcr:0.8},
+  {d:"2022-08",fg:38,vix:25.9,sp:3955,hys:4.66,pcr:0.72},
+  {d:"2022-09",fg:18,vix:32.6,sp:3586,hys:5.43,pcr:0.9},
+  {d:"2022-10",fg:45,vix:25.6,sp:3872,hys:5.13,pcr:0.85},
+  {d:"2022-11",fg:55,vix:21.2,sp:4080,hys:4.84,pcr:0.75},
+  {d:"2022-12",fg:35,vix:21.7,sp:3840,hys:4.68,pcr:0.78},
+  {d:"2023-01",fg:55,vix:19.4,sp:4077,hys:4.63,pcr:0.7},
+  {d:"2023-02",fg:62,vix:20.7,sp:3970,hys:4.8,pcr:0.68},
+  {d:"2023-03",fg:32,vix:26.5,sp:4109,hys:4.84,pcr:0.75},
+  {d:"2023-04",fg:55,vix:15.8,sp:4169,hys:4.57,pcr:0.68},
+  {d:"2023-05",fg:65,vix:17.0,sp:4205,hys:4.69,pcr:0.65},
+  {d:"2023-06",fg:75,vix:13.6,sp:4450,hys:4.29,pcr:0.62},
+  {d:"2023-07",fg:80,vix:13.3,sp:4589,hys:3.94,pcr:0.6},
+  {d:"2023-08",fg:48,vix:17.1,sp:4508,hys:3.9,pcr:0.65},
+  {d:"2023-09",fg:30,vix:17.5,sp:4288,hys:3.89,pcr:0.68},
+  {d:"2023-10",fg:25,vix:21.3,sp:4194,hys:4.36,pcr:0.72},
+  {d:"2023-11",fg:62,vix:13.1,sp:4568,hys:3.99,pcr:0.62},
+  {d:"2023-12",fg:75,vix:12.5,sp:4770,hys:3.57,pcr:0.58},
+  {d:"2024-01",fg:72,vix:13.3,sp:4890,hys:3.55,pcr:0.62},
+  {d:"2024-02",fg:75,vix:13.7,sp:5096,hys:3.36,pcr:0.58},
+  {d:"2024-03",fg:70,vix:13.0,sp:5254,hys:3.18,pcr:0.56},
+  {d:"2024-04",fg:35,vix:19.2,sp:5036,hys:3.23,pcr:0.65},
+  {d:"2024-05",fg:52,vix:12.9,sp:5277,hys:3.12,pcr:0.58},
+  {d:"2024-06",fg:55,vix:12.3,sp:5460,hys:3.2,pcr:0.56},
+  {d:"2024-07",fg:52,vix:18.1,sp:5522,hys:3.16,pcr:0.58},
+  {d:"2024-08",fg:28,vix:38.6,sp:5346,hys:3.37,pcr:0.68},
+  {d:"2024-09",fg:65,vix:16.7,sp:5762,hys:3.26,pcr:0.6},
+  {d:"2024-10",fg:60,vix:20.0,sp:5705,hys:2.93,pcr:0.62},
+  {d:"2024-11",fg:65,vix:14.2,sp:6032,hys:2.7,pcr:0.56},
+  {d:"2024-12",fg:32,vix:17.4,sp:5881,hys:2.76,pcr:0.65},
+  {d:"2025-01",fg:48,vix:16.4,sp:6041,hys:2.72,pcr:0.6},
+  {d:"2025-02",fg:25,vix:19.6,sp:5955,hys:2.71,pcr:0.65},
+  {d:"2025-03",fg:8,vix:29.0,sp:5580,hys:3.17,pcr:0.78},
+  {d:"2025-04",fg:4,vix:52.3,sp:5074,hys:4.03,pcr:0.95},
+  {d:"2025-05",fg:40,vix:22.5,sp:5686,hys:3.35,pcr:0.75},
+  {d:"2025-06",fg:55,vix:16.8,sp:5950,hys:3.13,pcr:0.65},
+  {d:"2025-07",fg:62,vix:15.5,sp:6100,hys:2.89,pcr:0.62},
+  {d:"2025-08",fg:58,vix:16.2,sp:6202,hys:2.9,pcr:0.6},
+  {d:"2025-09",fg:50,vix:17.8,sp:6350,hys:2.79,pcr:0.62},
+  {d:"2025-10",fg:45,vix:19.5,sp:6480,hys:2.92,pcr:0.65},
+  {d:"2025-11",fg:55,vix:16.1,sp:6620,hys:3.08,pcr:0.6},
+  {d:"2025-12",fg:48,vix:17.9,sp:6850,hys:2.89,pcr:0.62},
+  {d:"2026-01",fg:55,vix:16.0,sp:7002,hys:2.74,pcr:0.58},
+  {d:"2026-02",fg:35,vix:19.8,sp:6780,hys:2.92,pcr:0.68},
+  {d:"2026-03",fg:20,vix:25.7,sp:6776,hys:3.13,pcr:0.82}
 ];
 
-let S = { data:[], tr:'all', status:'loading', lastUp:null, kapital:100000 };
+let S = { data:[], tr:'all', status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null };
 
 function buildData(live) {
-  const rows = H_DATA.map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp}));
+  const rows = H_DATA.map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp, hys:h.hys||null, pcr:h.pcr||null}));
   if (live) {
     const last = rows[rows.length-1];
     if (live.fearGreed != null) last.fg = live.fearGreed;
     if (live.vix != null) last.vix = live.vix;
     if (live.sp500 != null) last.sp = live.sp500;
+    if (live.hys != null) last.hys = live.hys;
+    if (live.pcr != null) last.pcr = live.pcr;
   }
   let ath = 0;
   return rows.map(d => { if(d.sp>ath) ath=d.sp; return {...d, drawdown:((d.sp-ath)/ath)*100, ath}; });
 }
 
-function fwdRet(data, idx) {
-  const f = Math.min(idx+12, data.length-1);
-  return f<=idx ? null : ((data[f].sp - data[idx].sp)/data[idx].sp*100).toFixed(1);
+function fwdRet(data, idx, months) {
+  const f = Math.min(idx+months, data.length-1);
+  return f<=idx || f===idx ? null : ((data[f].sp - data[idx].sp)/data[idx].sp*100).toFixed(1);
+}
+function fwdRets(data, idx) {
+  // Monate seit Signal
+  const last = data.length - 1;
+  const mSince = last - idx;
+  return {
+    m12:  mSince >= 12  ? fwdRet(data, idx, 12)  : null,
+    m36:  mSince >= 36  ? fwdRet(data, idx, 36)  : null,
+    m60:  mSince >= 60  ? fwdRet(data, idx, 60)  : null,
+    m120: mSince >= 120 ? fwdRet(data, idx, 120) : null,
+    mNow: idx < last ? ((data[last].sp - data[idx].sp) / data[idx].sp * 100).toFixed(1) : null,
+    mSince: mSince,
+  };
 }
 
 function tActive(d, t) {
-  return d.drawdown < t.spDD && d.vix > t.vixMin && d.fg < t.fgMax;
+  const hysOk = d.hys == null || d.hys > t.hysMin;
+  const pcrOk = d.pcr == null || d.pcr > t.pcrMin;
+  return d.drawdown < t.spDD && d.vix > t.vixMin && d.fg < t.fgMax && hysOk && pcrOk;
 }
 
 function chf(n) {
@@ -239,7 +490,7 @@ function chf(n) {
 
 function vis() {
   if(S.tr==='all') return S.data;
-  const m = S.tr==='3y'?36:S.tr==='5y'?60:120;
+  const m = S.tr==='3y'?36:S.tr==='5y'?60:S.tr==='10y'?120:S.tr==='20y'?240:S.data.length;
   return S.data.slice(Math.max(0, S.data.length-m));
 }
 
@@ -267,13 +518,21 @@ function render() {
   const bs1=data.map((d,i)=>({...d,i})).filter(d=>tActive(d,TRANCHEN[0]));
   const bs2=data.map((d,i)=>({...d,i})).filter(d=>tActive(d,TRANCHEN[1]));
   const bs3=data.map((d,i)=>({...d,i})).filter(d=>tActive(d,TRANCHEN[2]));
-  const hs=full.map((d,i)=>({...d,idx:i})).filter(d=>tActive(d,TRANCHEN[0])).map(d=>({...d,fw:fwdRet(full,d.idx)}));
-  const valid=hs.filter(s=>s.fw!==null);
-  const avg=valid.length?(valid.reduce((a,b)=>a+parseFloat(b.fw),0)/valid.length).toFixed(1):null;
+  const hs=full.map((d,i)=>({...d,idx:i})).filter(d=>tActive(d,TRANCHEN[0])).map(d=>({...d,...fwdRets(full,d.idx)}));
+  const valid12=hs.filter(s=>s.m12!==null);
+  const valid36=hs.filter(s=>s.m36!==null);
+  const valid60=hs.filter(s=>s.m60!==null);
+  const valid120=hs.filter(s=>s.m120!==null);
+  const validNow=hs.filter(s=>s.mNow!==null);
+  const avg12=valid12.length?(valid12.reduce((a,b)=>a+parseFloat(b.m12),0)/valid12.length).toFixed(1):null;
+  const avg36=valid36.length?(valid36.reduce((a,b)=>a+parseFloat(b.m36),0)/valid36.length).toFixed(1):null;
+  const avg60=valid60.length?(valid60.reduce((a,b)=>a+parseFloat(b.m60),0)/valid60.length).toFixed(1):null;
+  const avg120=valid120.length?(valid120.reduce((a,b)=>a+parseFloat(b.m120),0)/valid120.length).toFixed(1):null;
+  const avgNow=validNow.length?(validNow.reduce((a,b)=>a+parseFloat(b.mNow),0)/validNow.length).toFixed(1):null;
 
   const tranchenHTML=TRANCHEN.map(t=>{
-    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax;
-    const active=c1&&c2&&c3;
+    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=S.pcr==null||S.pcr>t.pcrMin;
+    const active=c1&&c2&&c3&&c4&&c5;
     return `<div class="tranche ${t.cls}${active?' active':''}">
       ${active?`<div class="now-badge">JETZT KAUFEN</div>`:''}
       <div class="t-badge">TRANCHE ${t.nr}</div>
@@ -283,6 +542,8 @@ function render() {
         <div class="cond ${c1?'met':'unmet'}"><div class="cond-dot"></div>S&P 500 Drawdown ≥ ${Math.abs(t.spDD)}% — aktuell ${cur.drawdown.toFixed(1)}%</div>
         <div class="cond ${c2?'met':'unmet'}"><div class="cond-dot"></div>VIX > ${t.vixMin} — aktuell ${cur.vix.toFixed(1)}</div>
         <div class="cond ${c3?'met':'unmet'}"><div class="cond-dot"></div>Fear &amp; Greed < ${t.fgMax} — aktuell ${cur.fg}</div>
+        <div class="cond ${c4?'met':'unmet'}"><div class="cond-dot"></div>High-Yield Spread > ${t.hysMin}% — ${S.hys!=null?'aktuell '+S.hys.toFixed(2)+'%':'wird geladen…'}</div>
+        <div class="cond ${c5?'met':'unmet'}"><div class="cond-dot"></div>Put/Call Ratio > ${t.pcrMin} — ${S.pcr!=null?'aktuell '+S.pcr.toFixed(2):'wird geladen…'}</div>
       </div>
     </div>`;
   }).join('');
@@ -312,8 +573,10 @@ function render() {
     <div class="sr">
       ${[
         {l:'Fear & Greed',fmt:String(cur.fg),t:'< 25 / 10 / 5',m:cur.fg<25,c:'var(--amber)'},
-        {l:'VIX',fmt:cur.vix.toFixed(2),t:'> 30',m:cur.vix>30,c:'var(--red)'},
-        {l:'S&P 500 Drawdown',fmt:cur.drawdown.toFixed(2)+'%',t:'> 5% / 10% / 20%',m:cur.drawdown<-5,c:'var(--blue)'}
+        {l:'VIX',fmt:cur.vix.toFixed(2),t:'> 25 / 30 / 40',m:cur.vix>25,c:'var(--red)'},
+        {l:'S&P 500 Drawdown',fmt:cur.drawdown.toFixed(2)+'%',t:'> 10% / 15% / 20%',m:cur.drawdown<-10,c:'var(--blue)'},
+        {l:'High-Yield Spread',fmt:S.hys!=null?S.hys.toFixed(2)+'%':'–',t:'> 4 / 5 / 6%',m:S.hys!=null&&S.hys>4.0,c:'var(--orange)'},
+        {l:'Put/Call Ratio (10T)',fmt:S.pcr!=null?S.pcr.toFixed(2):'–',t:'> 0.75 / 0.90 / 1.05',m:S.pcr!=null&&S.pcr>0.75,c:'var(--purple)'}
       ].map(c=>`<div class="sc ${c.m?'m':''}">
         <div class="lb">${c.l}</div>
         <div class="vl" style="color:${c.c}">${c.fmt}</div>
@@ -322,8 +585,40 @@ function render() {
       </div>`).join('')}
     </div>
 
+    <div class="info-box">
+      <button class="info-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('span').textContent=this.nextElementSibling.classList.contains('open')?'▲ einklappen':'▼ Indikatoren erklärt'">
+        ℹ️ Indikatoren erklärt <span>▼ Indikatoren erklärt</span>
+      </button>
+      <div class="info-body">
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--amber)">Fear &amp; Greed Index</div>
+          <div class="info-card-text">Misst das aktuelle Anleger-Sentiment anhand von 7 Faktoren (u.a. Marktimpuls, Put/Call-Ratio, Safe-Haven-Nachfrage). Werte von 0–100: je tiefer, desto grösser die Panik am Markt. Extreme Angst ist historisch ein Kaufsignal.</div>
+          <div class="info-card-signal" style="background:rgba(245,158,11,.15);color:var(--amber)">Signal: &lt; 25 / 10 / 5</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--red)">VIX – Volatilitiätsindex</div>
+          <div class="info-card-text">Der „Angstindex“ der Wall Street. Misst die erwartete Schwankungsbreite des S&amp;P 500 in den nächsten 30 Tagen anhand von Optionspreisen. Ein hoher VIX (&gt;30) signalisiert Panik und Unsicherheit – historisch ein Kontra-Signal für Kaufgelegenheiten.</div>
+          <div class="info-card-signal" style="background:rgba(239,68,68,.15);color:var(--red)">Signal: &gt; 25 / 30 / 40</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--blue)">S&amp;P 500 Drawdown</div>
+          <div class="info-card-text">Prozentualer Rückgang des S&amp;P 500 vom letzten Allzeithoch (ATH). Misst den konkreten Preisverfall – unabhängig von Sentiment. Ein Drawdown von −10% oder mehr ist historisch selten und zeigt eine echte Marktkorrektur an.</div>
+          <div class="info-card-signal" style="background:rgba(96,165,250,.15);color:var(--blue)">Signal: &gt; 10% / 15% / 20%</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--orange)">High-Yield Spread</div>
+          <div class="info-card-text">Zinsaufschlag von US-Hochzinsanleihen („Junk Bonds“) gegenüber US-Staatsanleihen. Steigt der Spread, signalisiert das Kreditstress und erhöhtes Ausfallrisiko in der Wirtschaft. Ein Spread &gt;5% zeigt echten Kreditmarkt-Stress – unabhängig vom Aktienmarkt.</div>
+          <div class="info-card-signal" style="background:rgba(251,146,60,.15);color:var(--orange)">Signal: &gt; 4 / 5 / 6%</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title" style="color:var(--purple)">Put/Call Ratio</div>
+          <div class="info-card-text">Verhältnis von Put- zu Call-Optionen an der CBOE (10-Tage-Durchschnitt). Puts sind Absicherungen gegen fallende Kurse. Ein hoher Wert (&gt;0.85) zeigt, dass viele Marktteilnehmer auf Kursrückgang setzen – ein klassisches Kontra-Signal für antizyklische Käufer.</div>
+          <div class="info-card-signal" style="background:rgba(167,139,250,.15);color:var(--purple)">Signal: &gt; 0.75 / 0.90 / 1.05</div>
+        </div>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-      ${['3y','5y','10y','all'].map(t=>`<button class="btn${S.tr===t?' ac':''}" data-r="${t}">${t==='3y'?'3J':t==='5y'?'5J':t==='10y'?'10J':'Alle'}</button>`).join('')}
+      ${['3y','5y','10y','20y','all'].map(t=>`<button class="btn${S.tr===t?' ac':''}" data-r="${t}">${t==='3y'?'3J':t==='5y'?'5J':t==='10y'?'10J':t==='20y'?'20J':'Alle'}</button>`).join('')}
       <div style="margin-left:auto;font-size:11px;color:var(--green);font-weight:600">${bs1.length} Tranche-1-Signal${bs1.length!==1?'e':''} im Zeitraum</div>
     </div>
 
@@ -361,7 +656,11 @@ function render() {
     <div class="sb">
       <div class="sh">
         <div class="st">Historische Kaufsignale (Tranche 1: DD ≥ 5% + VIX > 30 + F&amp;G < 25)</div>
-        ${avg?`<div class="ab">Ø +${avg}% nach 12 Monaten</div>`:''}
+        ${avg12?`<div class="ab">Ø +${avg12}% (1J)</div>`:''}
+        ${avg36?`<div class="ab" style="background:rgba(167,139,250,.12);color:var(--purple)">Ø +${avg36}% (3J)</div>`:''}
+        ${avg60?`<div class="ab" style="background:rgba(251,146,60,.12);color:var(--orange)">Ø +${avg60}% (5J)</div>`:''}
+        ${avg120?`<div class="ab" style="background:rgba(96,165,250,.12);color:var(--blue)">Ø +${avg120}% (10J)</div>`:''}
+        ${avgNow?`<div class="ab" style="background:rgba(100,220,130,.12);color:var(--green)">Ø +${avgNow}% (bis heute)</div>`:''} 
       </div>
       ${hs.length===0
         ?'<div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Keine Signale im gewählten Zeitraum.</div>'
@@ -372,10 +671,19 @@ function render() {
             :t2
             ?`<span style="background:rgba(245,158,11,.2);color:var(--amber);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px">T1+T2</span>`
             :`<span style="background:rgba(34,197,94,.2);color:var(--green);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px">T1</span>`;
+          const col = v => v===null?'var(--muted)':parseFloat(v)>0?'var(--green)':'var(--red)';
+          const fmt = (v,label) => v!==null?(parseFloat(v)>0?'+':'')+v+'%'+label:'–';
+          const mLabel = s.mSince < 12 ? s.mSince+'M' : s.mSince < 24 ? (s.mSince/12).toFixed(1)+'J' : Math.round(s.mSince/12)+'J';
           return `<div class="sg">
             <div class="sd">${s.date}</div>
-            <div class="si">F&amp;G: <b style="color:var(--amber)">${s.fg}</b> · VIX: <b style="color:var(--red)">${s.vix}</b> · DD: <b style="color:var(--blue)">${s.drawdown.toFixed(1)}%</b>${tag}</div>
-            <div class="sret" style="color:${s.fw&&parseFloat(s.fw)>0?'var(--green)':s.fw?'var(--red)':'var(--muted)'}">${s.fw?(parseFloat(s.fw)>0?'+':'')+s.fw+'% (12M)':'offen'}</div>
+            <div class="si">F&amp;G: <b style="color:var(--amber)">${s.fg}</b> · VIX: <b style="color:var(--red)">${s.vix.toFixed(1)}</b> · DD: <b style="color:var(--blue)">${s.drawdown.toFixed(1)}%</b>${s.hys!=null?' · HYS: <b style="color:var(--orange)">'+s.hys+'%</b>':''}${s.pcr!=null?' · PCR: <b style="color:var(--purple)">'+s.pcr+'</b>':''}${tag}</div>
+            <div class="sret" style="display:flex;gap:6px;flex-wrap:wrap">
+              ${s.m12!==null?`<span style="color:${col(s.m12)}">${fmt(s.m12,' (1J)')}</span>`:''}
+              ${s.m36!==null?`<span style="color:${col(s.m36)}">${fmt(s.m36,' (3J)')}</span>`:''}
+              ${s.m60!==null?`<span style="color:${col(s.m60)}">${fmt(s.m60,' (5J)')}</span>`:''}
+              ${s.m120!==null?`<span style="color:${col(s.m120)}">${fmt(s.m120,' (10J)')}</span>`:''}
+              ${s.mNow!==null?`<span style="color:${col(s.mNow)};background:rgba(100,220,130,.08);padding:1px 5px;border-radius:3px">${fmt(s.mNow,' ('+mLabel+' → heute)')}</span>`:''}
+            </div>
           </div>`;
         }).join('')}
       <div class="hb">Monatliche Snapshots. Keine Anlageberatung.</div>
@@ -404,6 +712,7 @@ function render() {
         <div><span class="tl">VIX</span><div class="tv" style="color:var(--red)">${d.vix.toFixed(1)}</div></div>
         <div><span class="tl">S&P 500</span><div class="tv">${d.sp.toLocaleString('de-CH')}</div></div>
         <div><span class="tl">DRAWDOWN</span><div class="tv" style="color:var(--blue)">${d.drawdown.toFixed(1)}%</div></div>
+        <div><span class="tl">PCR</span><div class="tv" style="color:var(--purple)">${d.pcr!=null?d.pcr.toFixed(2):'–'}</div></div>
         <div><span class="tl">SIGNAL</span><div class="tv">${sig}</div></div>`;
     }
   });
@@ -416,13 +725,13 @@ async function init() {
     const res=await fetch(WORKER+'/api/data');
     if(res.ok){
       const live=await res.json();
-      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; render();
+      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; render();
     }
   } catch(e){}
   setInterval(async()=>{
     try{
       const res=await fetch(WORKER+'/api/data');
-      if(res.ok){const live=await res.json();S.data=buildData(live);S.status='live';S.lastUp=live.fetchedAt;render();}
+      if(res.ok){const live=await res.json();S.data=buildData(live);S.status='live';S.lastUp=live.fetchedAt;S.hys=live.hys??null;S.pcr=live.pcr??null;render();}
     }catch(e){}
   }, CACHE_MS);
 }
