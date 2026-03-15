@@ -2,9 +2,12 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 <title>Antizyklisches Einstiegssignal</title>
 <style>
+html { height: auto; }
+body { height: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
 :root {
   --bg: #0a0e17; --fg: #e2e8f0; --muted: #64748b;
   --border: rgba(148,163,184,.12); --card: #111827; --card2: #0f172a;
@@ -12,7 +15,7 @@
   --font: 'Inter', system-ui, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; min-height: 100vh; padding: 24px 16px 48px; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; padding: 24px 16px 48px; }
 #app { max-width: 960px; margin: 0 auto; }
 .hl { font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--green); text-transform: uppercase; margin-bottom: 8px; }
 h1 { font-size: 22px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
@@ -104,14 +107,30 @@ svg { display: block; width: 100%; }
 .info-card-title { font-size: 11px; font-weight: 700; margin-bottom: 6px; }
 .info-card-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
 .info-card-signal { font-size: 10px; margin-top: 8px; padding: 3px 8px; border-radius: 4px; display: inline-block; font-weight: 600; }
-@media (max-width: 640px) { .info-body.open { grid-template-columns: 1fr; } }
 
-@media (max-width: 640px) {
-  .tranchen { grid-template-columns: 1fr; } .sr, .r-results { grid-template-columns: repeat(2, 1fr); }
-  .sg { grid-template-columns: 60px 1fr; }
+
+
   .sret { display: none; }
   .tb.a { grid-template-columns: repeat(3,1fr); }
 }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 640px) {
+    .wrap { padding: 12px 10px; }
+    .sr { grid-template-columns: repeat(2, 1fr) !important; }
+    .tranchen { grid-template-columns: 1fr !important; }
+    .info-body.open { grid-template-columns: 1fr !important; }
+    .r-results { grid-template-columns: 1fr !important; }
+    .sc { padding: 10px 12px; }
+    .tc { padding: 14px; }
+    h1 { font-size: 16px !important; }
+    .btn { padding: 5px 10px; font-size: 11px; }
+    .sg { grid-template-columns: 1fr !important; }
+    .sret { flex-direction: column; gap: 4px !important; }
+    .sret span { font-size: 11px; }
+    .ab { font-size: 10px; padding: 3px 8px; }
+    .sr .sc:nth-child(n+5) { display: none; } /* PCR auf Mobile ausblenden wenn zu eng */
+  }
 </style>
 </head>
 <body>
@@ -498,7 +517,7 @@ function render() {
   const data=vis(), full=S.data, cur=full[full.length-1];
   if(!cur) return;
 
-  const W=900,HH=420,pL=52,pR=52,pT=28,pB=55,pW=W-pL-pR,pH=HH-pT-pB;
+  const W=Math.min(900, window.innerWidth ? window.innerWidth - 32 : 900),HH=420,pL=52,pR=52,pT=28,pB=55,pW=W-pL-pR,pH=HH-pT-pB;
   const xS=i=>pL+(i/(data.length-1))*pW;
   const mD=Math.min(...data.map(d=>d.drawdown),-22);
   const yD=v=>pT+((-v/(-mD))*pH);
@@ -736,6 +755,48 @@ async function init() {
   }, CACHE_MS);
 }
 init();
+</script>
+
+<script>
+(function() {
+  function notifyHeight() {
+    const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+  }
+  // Beim Laden
+  window.addEventListener('load', notifyHeight);
+  // Bei Resize (z.B. Accordion öffnen)
+  if (window.ResizeObserver) {
+    new ResizeObserver(notifyHeight).observe(document.body);
+  } else {
+    window.addEventListener('resize', notifyHeight);
+  }
+  // Periodisch als Fallback (z.B. nach render())
+  setInterval(notifyHeight, 1000);
+})();
+</script>
+
+<script>
+(function() {
+  function sendHeight() {
+    const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'resize', height: h }, '*');
+    }
+    // Auch für Systeme.io spezifisches Format
+    if (window.frameElement) {
+      try { window.frameElement.style.height = h + 'px'; } catch(e) {}
+    }
+  }
+  // Nach Login und bei Resize senden
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  // MutationObserver für dynamische Inhalte
+  const obs = new MutationObserver(sendHeight);
+  obs.observe(document.body, { childList: true, subtree: true });
+  // Intervall als Fallback
+  setInterval(sendHeight, 1000);
+})();
 </script>
 </body>
 </html>
