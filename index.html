@@ -528,6 +528,29 @@ function vis() {
   return S.data.slice(Math.max(0, S.data.length-m));
 }
 
+
+  // Responsive Layout per JS (funktioniert auch im iframe)
+  function applyResponsive() {
+    const w = window.innerWidth;
+    const isMobile = w < 700;
+    const el = document.getElementById('app');
+    if (!el) return;
+    // Tranchen
+    const tr = el.querySelector('.tranchen');
+    if (tr) tr.style.gridTemplateColumns = isMobile ? '1fr' : '';
+    // Status-Karten
+    const sr = el.querySelector('.sr');
+    if (sr) sr.style.gridTemplateColumns = isMobile ? 'repeat(2, 1fr)' : '';
+    // Info-Box
+    const ib = el.querySelector('.info-body');
+    if (ib) ib.style.gridTemplateColumns = isMobile ? '1fr' : '';
+    // Backtesting
+    const rr = el.querySelector('.r-results');
+    if (rr) rr.style.gridTemplateColumns = isMobile ? '1fr' : '';
+  }
+  window.addEventListener('resize', applyResponsive);
+  window.addEventListener('load', applyResponsive);
+
 function render() {
   const data=vis(), full=S.data, cur=full[full.length-1];
   if(!cur) return;
@@ -759,7 +782,7 @@ async function init() {
     const res=await fetch(WORKER+'/api/data');
     if(res.ok){
       const live=await res.json();
-      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; render();
+      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; render(); applyResponsive();
     }
   } catch(e){}
   setInterval(async()=>{
@@ -809,7 +832,7 @@ init();
   window.addEventListener('load', sendHeight);
   window.addEventListener('resize', sendHeight);
   // MutationObserver für dynamische Inhalte
-  const obs = new MutationObserver(sendHeight);
+  const obs = new MutationObserver(() => { sendHeight(); applyResponsive(); });
   obs.observe(document.body, { childList: true, subtree: true });
   // Intervall als Fallback
   setInterval(sendHeight, 1000);
