@@ -114,9 +114,7 @@ svg { display: block; width: 100%; }
   .tb.a { grid-template-columns: repeat(3,1fr); }
 }
 
-  /* ── Mobile Responsive ── */
-  @media (max-width: 640px) {
-    .wrap { padding: 12px 10px; }
+  
     .sr { grid-template-columns: repeat(2, 1fr) !important; }
     .tranchen { grid-template-columns: 1fr !important; }
     .info-body.open { grid-template-columns: 1fr !important; }
@@ -130,6 +128,23 @@ svg { display: block; width: 100%; }
     .sret span { font-size: 11px; }
     .ab { font-size: 10px; padding: 3px 8px; }
     .sr .sc:nth-child(n+5) { display: none; } /* PCR auf Mobile ausblenden wenn zu eng */
+  }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 768px) {
+    .wrap { padding: 12px 10px; max-width: 100%; }
+    .tranchen { grid-template-columns: 1fr !important; }
+    .sr { grid-template-columns: repeat(2, 1fr) !important; }
+    .r-results { grid-template-columns: 1fr !important; }
+    .info-body.open { grid-template-columns: 1fr !important; }
+    .sg { grid-template-columns: 1fr !important; }
+    .sret { flex-direction: column; gap: 4px !important; }
+    .sret span { font-size: 11px; }
+    .ab { font-size: 10px; padding: 3px 8px; }
+    .btn { padding: 5px 10px; font-size: 11px; }
+    h1 { font-size: 17px !important; }
+    .sc { padding: 10px 12px; }
+    .tc { padding: 14px; }
   }
 </style>
 </head>
@@ -779,11 +794,13 @@ init();
 <script>
 (function() {
   function sendHeight() {
-    const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    // Echte Content-Höhe: letztes Element + dessen Position
+    const app = document.getElementById('app');
+    const h = app ? Math.ceil(app.getBoundingClientRect().bottom + window.scrollY) + 20
+                  : document.documentElement.scrollHeight;
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'resize', height: h }, '*');
     }
-    // Auch für Systeme.io spezifisches Format
     if (window.frameElement) {
       try { window.frameElement.style.height = h + 'px'; } catch(e) {}
     }
