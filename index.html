@@ -109,12 +109,55 @@ const WORKER = 'https://signal-dashboard.blue-hill-33fd.workers.dev';
 const CACHE_MS = 5 * 60 * 1000;
 
 const TRANCHEN = [
-  { nr:1, pct:20, cls:'t1', spDD:-5,  vixMin:30, fgMax:25, desc:'Erste Investition – Korrektur beginnt' },
+  { nr:1, pct:20, cls:'t1', spDD:-5,  vixMin:25, fgMax:25, desc:'Erste Investition – Korrektur beginnt' },
   { nr:2, pct:40, cls:'t2', spDD:-10, vixMin:30, fgMax:10, desc:'Aufstocken – deutliche Korrektur' },
-  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:30, fgMax:5,  desc:'Vollinvestition – Panik am Markt' },
+  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  desc:'Vollinvestition – Panik am Markt' },
 ];
 
 const H_DATA = [
+  // 2012 (S&P Monatskurse, VIX Monatsdurchschnitt, F&G rekonstruiert)
+  {d:"2012-01",fg:52,vix:21.3,sp:1301},{d:"2012-02",fg:62,vix:18.0,sp:1352},
+  {d:"2012-03",fg:68,vix:15.5,sp:1389},{d:"2012-04",fg:42,vix:17.5,sp:1386},
+  {d:"2012-05",fg:12,vix:25.5,sp:1341},{d:"2012-06",fg:35,vix:19.0,sp:1323},
+  {d:"2012-07",fg:48,vix:16.5,sp:1360},{d:"2012-08",fg:60,vix:14.7,sp:1403},
+  {d:"2012-09",fg:65,vix:14.6,sp:1443},{d:"2012-10",fg:45,vix:18.6,sp:1438},
+  {d:"2012-11",fg:50,vix:16.5,sp:1395},{d:"2012-12",fg:55,vix:18.0,sp:1422},
+  // 2013
+  {d:"2013-01",fg:70,vix:14.7,sp:1480},{d:"2013-02",fg:65,vix:14.9,sp:1512},
+  {d:"2013-03",fg:72,vix:13.5,sp:1551},{d:"2013-04",fg:76,vix:13.5,sp:1571},
+  {d:"2013-05",fg:78,vix:13.1,sp:1640},{d:"2013-06",fg:38,vix:20.5,sp:1619},
+  {d:"2013-07",fg:68,vix:12.0,sp:1669},{d:"2013-08",fg:32,vix:17.0,sp:1670},
+  {d:"2013-09",fg:62,vix:14.9,sp:1687},{d:"2013-10",fg:74,vix:13.7,sp:1720},
+  {d:"2013-11",fg:76,vix:12.4,sp:1784},{d:"2013-12",fg:80,vix:13.7,sp:1808},
+  // 2014
+  {d:"2014-01",fg:42,vix:18.4,sp:1822},{d:"2014-02",fg:60,vix:14.5,sp:1817},
+  {d:"2014-03",fg:58,vix:14.4,sp:1864},{d:"2014-04",fg:48,vix:14.6,sp:1864},
+  {d:"2014-05",fg:62,vix:11.9,sp:1890},{d:"2014-06",fg:68,vix:10.6,sp:1947},
+  {d:"2014-07",fg:45,vix:16.9,sp:1973},{d:"2014-08",fg:65,vix:12.1,sp:1962},
+  {d:"2014-09",fg:42,vix:16.3,sp:1993},{d:"2014-10",fg:18,vix:31.1,sp:1937},
+  {d:"2014-11",fg:68,vix:13.3,sp:2045},{d:"2014-12",fg:48,vix:19.2,sp:2054},
+  // 2015
+  {d:"2015-01",fg:42,vix:20.1,sp:2028},{d:"2015-02",fg:68,vix:14.7,sp:2082},
+  {d:"2015-03",fg:52,vix:15.6,sp:2080},{d:"2015-04",fg:62,vix:13.8,sp:2095},
+  {d:"2015-05",fg:60,vix:13.1,sp:2112},{d:"2015-06",fg:32,vix:18.9,sp:2099},
+  {d:"2015-07",fg:50,vix:18.0,sp:2094},{d:"2015-08",fg:8,vix:40.7,sp:2040},
+  {d:"2015-09",fg:10,vix:27.6,sp:1944},{d:"2015-10",fg:52,vix:17.1,sp:2025},
+  {d:"2015-11",fg:42,vix:16.3,sp:2081},{d:"2015-12",fg:28,vix:18.2,sp:2054},
+  // 2016
+  {d:"2016-01",fg:10,vix:28.1,sp:1919},{d:"2016-02",fg:18,vix:24.2,sp:1904},
+  {d:"2016-03",fg:52,vix:15.7,sp:2022},{d:"2016-04",fg:58,vix:15.9,sp:2076},
+  {d:"2016-05",fg:55,vix:14.2,sp:2066},{d:"2016-06",fg:22,vix:26.7,sp:2084},
+  {d:"2016-07",fg:68,vix:12.0,sp:2149},{d:"2016-08",fg:72,vix:11.5,sp:2171},
+  {d:"2016-09",fg:60,vix:13.3,sp:2158},{d:"2016-10",fg:38,vix:17.1,sp:2143},
+  {d:"2016-11",fg:70,vix:14.2,sp:2165},{d:"2016-12",fg:72,vix:14.0,sp:2247},
+  // 2017
+  {d:"2017-01",fg:68,vix:11.6,sp:2275},{d:"2017-02",fg:75,vix:11.6,sp:2330},
+  {d:"2017-03",fg:62,vix:12.0,sp:2367},{d:"2017-04",fg:65,vix:10.8,sp:2359},
+  {d:"2017-05",fg:70,vix:10.4,sp:2395},{d:"2017-06",fg:62,vix:11.2,sp:2434},
+  {d:"2017-07",fg:68,vix:10.3,sp:2454},{d:"2017-08",fg:55,vix:12.3,sp:2456},
+  {d:"2017-09",fg:68,vix:10.0,sp:2493},{d:"2017-10",fg:78,vix:10.2,sp:2557},
+  {d:"2017-11",fg:72,vix:11.4,sp:2594},{d:"2017-12",fg:75,vix:11.1,sp:2664},
+  // 2018–2026
   {d:"2018-01",fg:73,vix:11,sp:2824},{d:"2018-02",fg:8,vix:33.5,sp:2714},
   {d:"2018-03",fg:14,vix:24.9,sp:2641},{d:"2018-04",fg:35,vix:15.9,sp:2648},
   {d:"2018-05",fg:45,vix:13.4,sp:2705},{d:"2018-06",fg:50,vix:12.4,sp:2718},
@@ -196,7 +239,8 @@ function chf(n) {
 
 function vis() {
   if(S.tr==='all') return S.data;
-  return S.data.slice(Math.max(0, S.data.length-(S.tr==='3y'?36:60)));
+  const m = S.tr==='3y'?36:S.tr==='5y'?60:120;
+  return S.data.slice(Math.max(0, S.data.length-m));
 }
 
 function render() {
@@ -279,7 +323,7 @@ function render() {
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-      ${['3y','5y','all'].map(t=>`<button class="btn${S.tr===t?' ac':''}" data-r="${t}">${t==='3y'?'3J':t==='5y'?'5J':'Alle'}</button>`).join('')}
+      ${['3y','5y','10y','all'].map(t=>`<button class="btn${S.tr===t?' ac':''}" data-r="${t}">${t==='3y'?'3J':t==='5y'?'5J':t==='10y'?'10J':'Alle'}</button>`).join('')}
       <div style="margin-left:auto;font-size:11px;color:var(--green);font-weight:600">${bs1.length} Tranche-1-Signal${bs1.length!==1?'e':''} im Zeitraum</div>
     </div>
 
@@ -337,7 +381,7 @@ function render() {
       <div class="hb">Monatliche Snapshots. Keine Anlageberatung.</div>
     </div>
 
-    <div class="ft">Antizyklisches Investitions-System · Keine Anlageberatung</div>`;
+    <div class="ft">Antizyklisches Investitions-System · Keine Anlageberatung · Live Daten · © how2invest.ch. Jegliche Weitergabe bedarf einer Genehmigung.</div>`;
 
   document.querySelectorAll('.btn[data-r]').forEach(b=>b.addEventListener('click',()=>{S.tr=b.dataset.r;render();}));
   document.getElementById('kap')?.addEventListener('input',e=>{
