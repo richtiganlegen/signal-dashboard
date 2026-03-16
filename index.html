@@ -155,9 +155,9 @@ const WORKER = 'https://signal-dashboard.blue-hill-33fd.workers.dev';
 const CACHE_MS = 5 * 60 * 1000;
 
 const TRANCHEN = [
-  { nr:1, pct:20, cls:'t1', spDD:-10, vixMin:25, fgMax:25, hysMin:4.0, pcrMin:0.95, desc:'Erste Investition – Korrektur beginnt' },
+  { nr:1, pct:20, cls:'t1', spDD:-10, vixMin:25, fgMax:25, hysMin:4.0, pcrMin:0.90, desc:'Erste Investition – Korrektur beginnt' },
   { nr:2, pct:40, cls:'t2', spDD:-15, vixMin:30, fgMax:10, hysMin:5.0, pcrMin:1.00, desc:'Aufstocken – deutliche Korrektur' },
-  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  hysMin:7.0, pcrMin:1.05, desc:'Vollinvestition – Panik am Markt' },
+  { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  hysMin:7.0, pcrMin:1.10, desc:'Vollinvestition – Panik am Markt' },
 ];
 
 const H_DATA = [
@@ -514,7 +514,7 @@ function fwdRets(data, idx) {
 
 function tActive(d, t) {
   const hysOk = d.hys == null || d.hys > t.hysMin;
-  const pcrOk = d.pcr == null || d.pcr > t.pcrMin;
+  const pcrOk = d.pcr == null || d.pcr >= t.pcrMin;
   return d.drawdown < t.spDD && d.vix > t.vixMin && d.fg < t.fgMax && hysOk && pcrOk;
 }
 
@@ -588,7 +588,7 @@ function render() {
   const avgNow=validNow.length?(validNow.reduce((a,b)=>a+parseFloat(b.mNow),0)/validNow.length).toFixed(1):null;
 
   const tranchenHTML=TRANCHEN.map(t=>{
-    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=S.pcr==null||S.pcr>t.pcrMin;
+    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=S.pcr==null||S.pcr>=t.pcrMin;
     const active=c1&&c2&&c3&&c4&&c5;
     return `<div class="tranche ${t.cls}${active?' active':''}">
       ${active?`<div class="now-badge">JETZT KAUFEN</div>`:''}
@@ -633,7 +633,7 @@ function render() {
         {l:'VIX',fmt:cur.vix.toFixed(2),t:'> 25 / 30 / 40',m:cur.vix>25,c:'var(--red)'},
         {l:'S&P 500 Drawdown',fmt:cur.drawdown.toFixed(2)+'%',t:'> 10% / 15% / 20%',m:cur.drawdown<-10,c:'var(--blue)'},
         {l:'High-Yield Spread',fmt:S.hys!=null?S.hys.toFixed(2)+'%':'–',t:'> 4 / 5 / 7%',m:S.hys!=null&&S.hys>4.0,c:'var(--orange)'},
-        {l:'Put/Call Ratio (Tageswert)',fmt:S.pcr!=null?S.pcr.toFixed(2):'–',t:'> 0.95 / 1.00 / 1.05',m:S.pcr!=null&&S.pcr>0.95,c:'var(--purple)'}
+        {l:'Put/Call Ratio (Tageswert)',fmt:S.pcr!=null?S.pcr.toFixed(2):'–',t:'> 0.90 / 1.00 / 1.10',m:S.pcr!=null&&S.pcr>=0.90,c:'var(--purple)'}
       ].map(c=>`<div class="sc ${c.m?'m':''}">
         <div class="lb">${c.l}</div>
         <div class="vl" style="color:${c.c}">${c.fmt}</div>
@@ -670,7 +670,7 @@ function render() {
         <div class="info-card">
           <div class="info-card-title" style="color:var(--purple)">Put/Call Ratio</div>
           <div class="info-card-text">Verhältnis von Put- zu Call-Optionen an der CBOE (aktueller Tageswert). Puts sind Absicherungen gegen fallende Kurse. Ein hoher Wert (&gt;0.85) zeigt, dass viele Marktteilnehmer auf Kursrückgang setzen – ein klassisches Kontra-Signal für antizyklische Käufer.</div>
-          <div class="info-card-signal" style="background:rgba(167,139,250,.15);color:var(--purple)">Signal: &gt; 0.95 / 1.00 / 1.05</div>
+          <div class="info-card-signal" style="background:rgba(167,139,250,.15);color:var(--purple)">Signal: &gt; 0.90 / 1.00 / 1.10</div>
         </div>
       </div>
     </div>
