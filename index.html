@@ -559,7 +559,7 @@ function render() {
   const mD=Math.min(...data.map(d=>d.drawdown),-22);
   const yD=v=>pT+((-v/(-mD))*pH);
   // HYS: 0-20% → invertiert (hoch = oben im Chart)
-  const mxH=Math.max(...vis_data.map(d=>d.hys||0),8);
+  const mxH=Math.max(...data.map(d=>d.hys||0),8);
   const yH=v=>v==null?null:pT+pH-(v/mxH*pH*0.8);
   // PCR: 0-1.5 → invertiert (hoch = oben im Chart)
   const yP=v=>v==null?null:pT+pH-(v/1.5*pH*0.8);
