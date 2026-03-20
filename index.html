@@ -503,20 +503,33 @@ function buildData(live) {
   return rows.map(d => { if(d.sp>ath) ath=d.sp; return {...d, drawdown:((d.sp-ath)/ath)*100, ath}; });
 }
 
-function fwdRet(data, idx, months) {
+function fwdRet(data, idx, months, field) {
   const f = Math.min(idx+months, data.length-1);
-  return f<=idx || f===idx ? null : ((data[f].sp - data[idx].sp)/data[idx].sp*100).toFixed(1);
+  if(f<=idx || f===idx) return null;
+  const v0=data[idx][field], v1=data[f][field];
+  return (v0&&v1) ? ((v1-v0)/v0*100).toFixed(1) : null;
 }
 function fwdRets(data, idx) {
-  // Monate seit Signal
   const last = data.length - 1;
   const mSince = last - idx;
+  const ret = (months, field) => mSince>=months ? fwdRet(data,idx,months,field) : null;
+  const retNow = (field) => {
+    const v0=data[idx][field], v1=data[last][field];
+    return (idx<last&&v0&&v1) ? ((v1-v0)/v0*100).toFixed(1) : null;
+  };
   return {
-    m12:  mSince >= 12  ? fwdRet(data, idx, 12)  : null,
-    m36:  mSince >= 36  ? fwdRet(data, idx, 36)  : null,
-    m60:  mSince >= 60  ? fwdRet(data, idx, 60)  : null,
-    m120: mSince >= 120 ? fwdRet(data, idx, 120) : null,
-    mNow: idx < last ? ((data[last].sp - data[idx].sp) / data[idx].sp * 100).toFixed(1) : null,
+    // S&P 500 TR CHF
+    m12:   ret(12,  'spTrChf'),
+    m36:   ret(36,  'spTrChf'),
+    m60:   ret(60,  'spTrChf'),
+    m120:  ret(120, 'spTrChf'),
+    mNow:  retNow('spTrChf'),
+    // SPI TR CHF
+    spi12:  ret(12,  'spi'),
+    spi36:  ret(36,  'spi'),
+    spi60:  ret(60,  'spi'),
+    spi120: ret(120, 'spi'),
+    spiNow: retNow('spi'),
     mSince: mSince,
   };
 }
@@ -640,6 +653,12 @@ function render() {
   const avg60=valid60.length?(valid60.reduce((a,b)=>a+parseFloat(b.m60),0)/valid60.length).toFixed(1):null;
   const avg120=valid120.length?(valid120.reduce((a,b)=>a+parseFloat(b.m120),0)/valid120.length).toFixed(1):null;
   const avgNow=validNow.length?(validNow.reduce((a,b)=>a+parseFloat(b.mNow),0)/validNow.length).toFixed(1):null;
+  // SPI Durchschnitte
+  const vspi12=hs.filter(s=>s.spi12!==null); const aspi12=vspi12.length?(vspi12.reduce((a,b)=>a+parseFloat(b.spi12),0)/vspi12.length).toFixed(1):null;
+  const vspi36=hs.filter(s=>s.spi36!==null); const aspi36=vspi36.length?(vspi36.reduce((a,b)=>a+parseFloat(b.spi36),0)/vspi36.length).toFixed(1):null;
+  const vspi60=hs.filter(s=>s.spi60!==null); const aspi60=vspi60.length?(vspi60.reduce((a,b)=>a+parseFloat(b.spi60),0)/vspi60.length).toFixed(1):null;
+  const vspi120=hs.filter(s=>s.spi120!==null); const aspi120=vspi120.length?(vspi120.reduce((a,b)=>a+parseFloat(b.spi120),0)/vspi120.length).toFixed(1):null;
+  const vspiNow=hs.filter(s=>s.spiNow!==null); const aspiNow=vspiNow.length?(vspiNow.reduce((a,b)=>a+parseFloat(b.spiNow),0)/vspiNow.length).toFixed(1):null;
 
   const tranchenHTML=TRANCHEN.map(t=>{
     const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=(S.pcr10d!=null?S.pcr10d:S.pcr)==null||(S.pcr10d!=null?S.pcr10d:S.pcr)>=t.pcrMin;
@@ -838,12 +857,23 @@ function render() {
 
     <div class="sb">
       <div class="sh">
-        <div class="st">Historische Kaufsignale (Tranche 1: DD ≥ 5% + VIX > 30 + F&amp;G < 25)</div>
-        ${avg12?`<div class="ab">Ø +${avg12}% (1J)</div>`:''}
-        ${avg36?`<div class="ab" style="background:rgba(167,139,250,.12);color:var(--purple)">Ø +${avg36}% (3J)</div>`:''}
-        ${avg60?`<div class="ab" style="background:rgba(251,146,60,.12);color:var(--orange)">Ø +${avg60}% (5J)</div>`:''}
-        ${avg120?`<div class="ab" style="background:rgba(96,165,250,.12);color:var(--blue)">Ø +${avg120}% (10J)</div>`:''}
-        ${avgNow?`<div class="ab" style="background:rgba(100,220,130,.12);color:var(--green)">Ø +${avgNow}% (bis heute)</div>`:''} 
+        <div class="st">Historische Kaufsignale (Tranche 1) · Renditen S&amp;P 500 TR CHF &amp; SPI TR CHF</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%">
+          <span style="font-size:10px;color:var(--muted);font-weight:600">S&amp;P 500 TR CHF:</span>
+          ${avg12?`<div class="ab">Ø +${avg12}% (1J)</div>`:''}
+          ${avg36?`<div class="ab" style="background:rgba(167,139,250,.12);color:var(--purple)">Ø +${avg36}% (3J)</div>`:''}
+          ${avg60?`<div class="ab" style="background:rgba(251,146,60,.12);color:var(--orange)">Ø +${avg60}% (5J)</div>`:''}
+          ${avg120?`<div class="ab" style="background:rgba(96,165,250,.12);color:var(--blue)">Ø +${avg120}% (10J)</div>`:''}
+          ${avgNow?`<div class="ab" style="background:rgba(100,220,130,.12);color:var(--green)">Ø +${avgNow}% (heute)</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%;margin-top:4px">
+          <span style="font-size:10px;color:var(--muted);font-weight:600">SPI TR CHF:</span>
+          ${aspi12?`<div class="ab" style="background:rgba(34,197,94,.12);color:var(--green)">Ø +${aspi12}% (1J)</div>`:''}
+          ${aspi36?`<div class="ab" style="background:rgba(34,197,94,.1);color:var(--green)">Ø +${aspi36}% (3J)</div>`:''}
+          ${aspi60?`<div class="ab" style="background:rgba(34,197,94,.08);color:var(--green)">Ø +${aspi60}% (5J)</div>`:''}
+          ${aspi120?`<div class="ab" style="background:rgba(34,197,94,.07);color:var(--green)">Ø +${aspi120}% (10J)</div>`:''}
+          ${aspiNow?`<div class="ab" style="background:rgba(34,197,94,.1);color:var(--green)">Ø +${aspiNow}% (heute)</div>`:''}
+        </div>
       </div>
       ${hs.length===0
         ?'<div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Keine Signale im gewählten Zeitraum.</div>'
@@ -860,12 +890,23 @@ function render() {
           return `<div class="sg">
             <div class="sd">${s.date}</div>
             <div class="si">F&amp;G: <b style="color:var(--amber)">${s.fg}</b> · VIX: <b style="color:var(--red)">${s.vix.toFixed(1)}</b> · DD: <b style="color:var(--blue)">${s.drawdown.toFixed(1)}%</b>${s.hys!=null?' · HYS: <b style="color:var(--orange)">'+s.hys+'%</b>':''}${s.pcr!=null?' · PCR: <b style="color:var(--purple)">'+s.pcr+'</b>':''}${s.spi!=null?' · SPI: <b style="color:rgba(255,255,255,.5)">'+s.spi.toLocaleString('de-CH')+'</b>':''}${tag}</div>
-            <div class="sret" style="display:flex;gap:6px;flex-wrap:wrap">
-              ${s.m12!==null?`<span style="color:${col(s.m12)}">${fmt(s.m12,' (1J)')}</span>`:''}
-              ${s.m36!==null?`<span style="color:${col(s.m36)}">${fmt(s.m36,' (3J)')}</span>`:''}
-              ${s.m60!==null?`<span style="color:${col(s.m60)}">${fmt(s.m60,' (5J)')}</span>`:''}
-              ${s.m120!==null?`<span style="color:${col(s.m120)}">${fmt(s.m120,' (10J)')}</span>`:''}
-              ${s.mNow!==null?`<span style="color:${col(s.mNow)};background:rgba(100,220,130,.08);padding:1px 5px;border-radius:3px">${fmt(s.mNow,' ('+mLabel+' → heute)')}</span>`:''}
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div class="sret" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:9px;color:var(--muted);min-width:70px">S&amp;P TR CHF:</span>
+                ${s.m12!==null?`<span style="color:${col(s.m12)};font-size:11px">${fmt(s.m12,' 1J')}</span>`:''}
+                ${s.m36!==null?`<span style="color:${col(s.m36)};font-size:11px">${fmt(s.m36,' 3J')}</span>`:''}
+                ${s.m60!==null?`<span style="color:${col(s.m60)};font-size:11px">${fmt(s.m60,' 5J')}</span>`:''}
+                ${s.m120!==null?`<span style="color:${col(s.m120)};font-size:11px">${fmt(s.m120,' 10J')}</span>`:''}
+                ${s.mNow!==null?`<span style="color:${col(s.mNow)};font-size:11px;background:rgba(100,220,130,.08);padding:1px 4px;border-radius:3px">${fmt(s.mNow,' '+mLabel)}</span>`:''}
+              </div>
+              <div class="sret" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:9px;color:var(--muted);min-width:70px">SPI TR CHF:</span>
+                ${s.spi12!==null?`<span style="color:${col(s.spi12)};font-size:11px">${fmt(s.spi12,' 1J')}</span>`:''}
+                ${s.spi36!==null?`<span style="color:${col(s.spi36)};font-size:11px">${fmt(s.spi36,' 3J')}</span>`:''}
+                ${s.spi60!==null?`<span style="color:${col(s.spi60)};font-size:11px">${fmt(s.spi60,' 5J')}</span>`:''}
+                ${s.spi120!==null?`<span style="color:${col(s.spi120)};font-size:11px">${fmt(s.spi120,' 10J')}</span>`:''}
+                ${s.spiNow!==null?`<span style="color:${col(s.spiNow)};font-size:11px;background:rgba(34,197,94,.08);padding:1px 4px;border-radius:3px">${fmt(s.spiNow,' '+mLabel)}</span>`:''}
+              </div>
             </div>
           </div>`;
         }).join('')}
