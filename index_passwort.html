@@ -97,33 +97,6 @@ svg { display: block; width: 100%; }
 .sret { font-size: 12px; font-weight: 700; white-space: nowrap; }
 .hb { font-size: 11px; color: var(--muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); line-height: 1.6; }
 .ft { font-size: 10px; color: var(--muted); text-align: center; margin-top: 24px; }
-#pw-overlay {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999;
-}
-.pw-box {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 40px; width: 340px; text-align: center;
-}
-.pw-logo { font-size: 28px; margin-bottom: 8px; }
-.pw-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.pw-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
-.pw-input {
-  width: 100%; background: var(--card2); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--fg); font-size: 15px;
-  padding: 10px 14px; margin-bottom: 12px; box-sizing: border-box;
-  text-align: center; letter-spacing: 2px;
-}
-.pw-input:focus { outline: none; border-color: var(--green); }
-.pw-btn {
-  width: 100%; background: var(--green); border: none; border-radius: 8px;
-  color: #0b0f1a; font-size: 14px; font-weight: 700;
-  padding: 11px; cursor: pointer;
-}
-.pw-btn:hover { opacity: 0.9; }
-.pw-err { font-size: 12px; color: var(--red); margin-top: 10px; min-height: 16px; }
-
 .info-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
 .info-toggle { width: 100%; background: none; border: none; color: var(--fg); cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; font-size: 13px; font-weight: 600; text-align: left; }
 .info-toggle:hover { background: rgba(148,163,184,.05); }
@@ -172,10 +145,51 @@ svg { display: block; width: 100%; }
     .sc { padding: 10px 12px; }
     .tc { padding: 14px; }
   }
+
+.smi-box { background: var(--card); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 16px 18px; margin-bottom: 24px; }
+.smi-title { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 12px; letter-spacing: .04em; }
+.smi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.smi-card { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.smi-card.smi-signal { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.04); }
+@media (max-width: 640px) { .smi-grid { grid-template-columns: 1fr; } }
+
+#pw-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.pw-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 40px; width: 340px; text-align: center; }
+.pw-logo { font-size: 28px; margin-bottom: 8px; }
+.pw-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.pw-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+.pw-input { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--fg); font-size: 15px; padding: 10px 14px; margin-bottom: 12px; box-sizing: border-box; text-align: center; letter-spacing: 2px; }
+.pw-input:focus { outline: none; border-color: var(--green); }
+.pw-btn { width: 100%; background: var(--green); border: none; border-radius: 8px; color: #000; font-size: 14px; font-weight: 700; padding: 11px; cursor: pointer; }
+.pw-btn:hover { opacity: .85; }
+.pw-error { color: var(--red); font-size: 12px; margin-top: 8px; display: none; }
 </style>
 </head>
 <body>
-<div id="app" style="display:none"><div style="color:var(--muted);padding:60px;text-align:center">Lade…</div></div>
+<div id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-logo">🔒</div>
+    <div class="pw-title">Antizyklisches Investment-Signal</div>
+    <div class="pw-sub">Zugang für Kursteilnehmer</div>
+    <input class="pw-input" type="password" id="pw-input" placeholder="Passwort" autocomplete="off"/>
+    <button class="pw-btn" onclick="checkPw()">Zugang</button>
+    <div class="pw-error" id="pw-error">Falsches Passwort</div>
+  </div>
+</div>
+<script>
+function checkPw() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === 'richtiganlegen') {
+    document.getElementById('pw-overlay').style.display = 'none';
+    init();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') checkPw(); });
+</script>
+
+<div id="app"><div style="color:var(--muted);padding:60px;text-align:center">Lade…</div></div>
 <script>
 const WORKER = 'https://signal-dashboard.blue-hill-33fd.workers.dev';
 const CACHE_MS = 5 * 60 * 1000;
@@ -187,327 +201,327 @@ const TRANCHEN = [
 ];
 
 const H_DATA = [
-  {d:"2000-01",fg:75,vix:24.2,sp:1394,hys:4.78,pcr:0.68},
-  {d:"2000-02",fg:70,vix:26.1,sp:1366,hys:4.9,pcr:0.65},
-  {d:"2000-03",fg:72,vix:26.8,sp:1499,hys:5.37,pcr:0.62},
-  {d:"2000-04",fg:45,vix:23.2,sp:1452,hys:5.85,pcr:0.75},
-  {d:"2000-05",fg:38,vix:20.8,sp:1421,hys:5.9,pcr:0.78},
-  {d:"2000-06",fg:55,vix:23.5,sp:1455,hys:6.14,pcr:0.72},
-  {d:"2000-07",fg:48,vix:20.4,sp:1431,hys:6.12,pcr:0.7},
-  {d:"2000-08",fg:52,vix:20.5,sp:1517,hys:6.36,pcr:0.68},
-  {d:"2000-09",fg:35,vix:22.8,sp:1448,hys:6.45,pcr:0.78},
-  {d:"2000-10",fg:25,vix:28.3,sp:1363,hys:7.29,pcr:0.88},
-  {d:"2000-11",fg:20,vix:27.2,sp:1315,hys:8.09,pcr:0.92},
-  {d:"2000-12",fg:28,vix:24.4,sp:1321,hys:9.01,pcr:0.85},
-  {d:"2001-01",fg:45,vix:26.5,sp:1366,hys:8.46,pcr:0.82},
-  {d:"2001-02",fg:32,vix:25.4,sp:1240,hys:7.61,pcr:0.88},
-  {d:"2001-03",fg:15,vix:28.5,sp:1160,hys:7.92,pcr:0.95},
-  {d:"2001-04",fg:52,vix:24.4,sp:1249,hys:8.5,pcr:0.8},
-  {d:"2001-05",fg:55,vix:21.2,sp:1255,hys:7.69,pcr:0.75},
-  {d:"2001-06",fg:38,vix:23.0,sp:1224,hys:8.06,pcr:0.8},
-  {d:"2001-07",fg:30,vix:23.8,sp:1211,hys:8.26,pcr:0.85},
-  {d:"2001-08",fg:22,vix:24.2,sp:1148,hys:8.05,pcr:0.88},
-  {d:"2001-09",fg:5,vix:38.5,sp:1040,hys:9.24,pcr:1.1},
-  {d:"2001-10",fg:18,vix:35.6,sp:1060,hys:9.8,pcr:1.05},
-  {d:"2001-11",fg:38,vix:28.5,sp:1139,hys:8.79,pcr:0.9},
-  {d:"2001-12",fg:50,vix:23.0,sp:1148,hys:8.29,pcr:0.82},
-  {d:"2002-01",fg:52,vix:22.2,sp:1130,hys:8.15,pcr:0.82},
-  {d:"2002-02",fg:45,vix:22.5,sp:1107,hys:8.1,pcr:0.85},
-  {d:"2002-03",fg:55,vix:20.8,sp:1147,hys:7.33,pcr:0.78},
-  {d:"2002-04",fg:42,vix:20.8,sp:1074,hys:7.16,pcr:0.82},
-  {d:"2002-05",fg:38,vix:21.0,sp:1067,hys:7.03,pcr:0.88},
-  {d:"2002-06",fg:18,vix:26.0,sp:990,hys:7.98,pcr:0.98},
-  {d:"2002-07",fg:8,vix:38.5,sp:862,hys:9.36,pcr:1.05},
-  {d:"2002-08",fg:15,vix:32.2,sp:917,hys:9.79,pcr:1.02},
-  {d:"2002-09",fg:5,vix:40.5,sp:815,hys:9.85,pcr:1.12},
-  {d:"2002-10",fg:20,vix:38.0,sp:885,hys:10.68,pcr:1.08},
-  {d:"2002-11",fg:35,vix:27.2,sp:936,hys:9.65,pcr:0.95},
-  {d:"2002-12",fg:20,vix:27.5,sp:879,hys:8.96,pcr:0.92},
-  {d:"2003-01",fg:22,vix:27.2,sp:896,hys:8.18,pcr:0.92},
-  {d:"2003-02",fg:18,vix:30.5,sp:841,hys:8.43,pcr:0.98},
-  {d:"2003-03",fg:15,vix:32.8,sp:800,hys:8.04,pcr:1.02},
-  {d:"2003-04",fg:45,vix:25.8,sp:880,hys:7.02,pcr:0.88},
-  {d:"2003-05",fg:55,vix:21.2,sp:929,hys:6.64,pcr:0.78},
-  {d:"2003-06",fg:58,vix:20.0,sp:975,hys:6.34,pcr:0.72},
-  {d:"2003-07",fg:62,vix:18.5,sp:990,hys:5.86,pcr:0.68},
-  {d:"2003-08",fg:65,vix:18.5,sp:1008,hys:5.82,pcr:0.65},
-  {d:"2003-09",fg:58,vix:18.5,sp:996,hys:5.36,pcr:0.68},
-  {d:"2003-10",fg:65,vix:16.5,sp:1050,hys:4.92,pcr:0.65},
-  {d:"2003-11",fg:70,vix:15.8,sp:1058,hys:4.62,pcr:0.62},
-  {d:"2003-12",fg:75,vix:15.5,sp:1112,hys:4.28,pcr:0.6},
-  {d:"2004-01",fg:72,vix:15.2,sp:1132,hys:3.94,pcr:0.62},
-  {d:"2004-02",fg:68,vix:14.8,sp:1145,hys:4.26,pcr:0.6},
-  {d:"2004-03",fg:62,vix:16.5,sp:1126,hys:4.4,pcr:0.65},
-  {d:"2004-04",fg:52,vix:15.8,sp:1108,hys:3.98,pcr:0.68},
-  {d:"2004-05",fg:48,vix:15.5,sp:1121,hys:4.25,pcr:0.65},
-  {d:"2004-06",fg:55,vix:16.5,sp:1141,hys:4.07,pcr:0.62},
-  {d:"2004-07",fg:48,vix:16.0,sp:1102,hys:4.01,pcr:0.65},
-  {d:"2004-08",fg:50,vix:14.5,sp:1104,hys:4.08,pcr:0.62},
-  {d:"2004-09",fg:52,vix:14.2,sp:1115,hys:3.87,pcr:0.6},
-  {d:"2004-10",fg:58,vix:14.5,sp:1130,hys:3.73,pcr:0.62},
-  {d:"2004-11",fg:65,vix:13.5,sp:1174,hys:3.29,pcr:0.6},
-  {d:"2004-12",fg:70,vix:13.2,sp:1212,hys:3.1,pcr:0.58},
-  {d:"2005-01",fg:60,vix:13.2,sp:1181,hys:3.2,pcr:0.6},
-  {d:"2005-02",fg:62,vix:12.5,sp:1203,hys:3.05,pcr:0.58},
-  {d:"2005-03",fg:55,vix:13.0,sp:1181,hys:2.98,pcr:0.62},
-  {d:"2005-04",fg:42,vix:14.5,sp:1156,hys:3.78,pcr:0.68},
-  {d:"2005-05",fg:50,vix:13.5,sp:1191,hys:4.23,pcr:0.65},
-  {d:"2005-06",fg:52,vix:12.5,sp:1191,hys:3.9,pcr:0.62},
-  {d:"2005-07",fg:60,vix:12.0,sp:1235,hys:3.49,pcr:0.58},
-  {d:"2005-08",fg:62,vix:12.0,sp:1220,hys:3.52,pcr:0.58},
-  {d:"2005-09",fg:55,vix:14.5,sp:1228,hys:3.47,pcr:0.6},
-  {d:"2005-10",fg:42,vix:16.5,sp:1207,hys:3.57,pcr:0.65},
-  {d:"2005-11",fg:55,vix:12.8,sp:1249,hys:3.37,pcr:0.62},
-  {d:"2005-12",fg:62,vix:12.0,sp:1248,hys:3.16,pcr:0.6},
-  {d:"2006-01",fg:68,vix:12.5,sp:1280,hys:3.17,pcr:0.6},
-  {d:"2006-02",fg:65,vix:11.5,sp:1281,hys:2.99,pcr:0.58},
-  {d:"2006-03",fg:70,vix:11.8,sp:1294,hys:3.01,pcr:0.6},
-  {d:"2006-04",fg:72,vix:12.5,sp:1310,hys:3.04,pcr:0.62},
-  {d:"2006-05",fg:38,vix:17.5,sp:1270,hys:3.4,pcr:0.72},
-  {d:"2006-06",fg:42,vix:17.5,sp:1270,hys:3.37,pcr:0.75},
-  {d:"2006-07",fg:52,vix:16.0,sp:1304,hys:3.12,pcr:0.68},
-  {d:"2006-08",fg:65,vix:12.5,sp:1304,hys:2.96,pcr:0.62},
-  {d:"2006-09",fg:68,vix:11.5,sp:1336,hys:2.88,pcr:0.58},
-  {d:"2006-10",fg:72,vix:11.0,sp:1377,hys:2.8,pcr:0.56},
-  {d:"2006-11",fg:68,vix:11.5,sp:1401,hys:2.73,pcr:0.58},
-  {d:"2006-12",fg:70,vix:11.0,sp:1418,hys:2.72,pcr:0.56},
-  {d:"2007-01",fg:72,vix:10.8,sp:1438,hys:2.65,pcr:0.56},
-  {d:"2007-02",fg:65,vix:11.5,sp:1407,hys:2.56,pcr:0.58},
-  {d:"2007-03",fg:60,vix:14.5,sp:1421,hys:2.6,pcr:0.65},
-  {d:"2007-04",fg:68,vix:13.0,sp:1482,hys:2.55,pcr:0.6},
-  {d:"2007-05",fg:72,vix:12.5,sp:1531,hys:2.54,pcr:0.58},
-  {d:"2007-06",fg:55,vix:16.0,sp:1503,hys:2.85,pcr:0.68},
-  {d:"2007-07",fg:55,vix:20.5,sp:1455,hys:3.56,pcr:0.75},
-  {d:"2007-08",fg:30,vix:30.0,sp:1474,hys:4.0,pcr:0.85},
-  {d:"2007-09",fg:45,vix:20.0,sp:1527,hys:3.83,pcr:0.72},
-  {d:"2007-10",fg:62,vix:18.0,sp:1549,hys:3.55,pcr:0.68},
-  {d:"2007-11",fg:25,vix:26.0,sp:1481,hys:4.34,pcr:0.82},
-  {d:"2007-12",fg:28,vix:22.5,sp:1468,hys:5.01,pcr:0.88},
-  {d:"2008-01",fg:15,vix:26.5,sp:1378,hys:5.99,pcr:0.92},
-  {d:"2008-02",fg:18,vix:25.0,sp:1330,hys:6.22,pcr:0.88},
-  {d:"2008-03",fg:12,vix:28.0,sp:1323,hys:6.78,pcr:0.95},
-  {d:"2008-04",fg:38,vix:20.5,sp:1385,hys:6.23,pcr:0.78},
-  {d:"2008-05",fg:48,vix:18.5,sp:1400,hys:5.98,pcr:0.72},
-  {d:"2008-06",fg:15,vix:23.0,sp:1280,hys:6.82,pcr:0.88},
-  {d:"2008-07",fg:10,vix:24.5,sp:1267,hys:7.32,pcr:0.9},
-  {d:"2008-08",fg:18,vix:21.0,sp:1283,hys:7.05,pcr:0.82},
-  {d:"2008-09",fg:5,vix:36.2,sp:1166,hys:8.34,pcr:1.02},
-  {d:"2008-10",fg:2,vix:59.9,sp:968,hys:14.44,pcr:1.25},
-  {d:"2008-11",fg:5,vix:65.0,sp:896,hys:16.81,pcr:1.18},
-  {d:"2008-12",fg:8,vix:45.0,sp:903,hys:18.7,pcr:1.1},
-  {d:"2009-01",fg:5,vix:44.2,sp:931,hys:17.71,pcr:1.08},
-  {d:"2009-02",fg:3,vix:46.0,sp:826,hys:17.32,pcr:1.12},
-  {d:"2009-03",fg:8,vix:42.0,sp:798,hys:16.22,pcr:1.05},
-  {d:"2009-04",fg:35,vix:35.0,sp:873,hys:13.09,pcr:0.88},
-  {d:"2009-05",fg:48,vix:28.0,sp:919,hys:11.17,pcr:0.78},
-  {d:"2009-06",fg:42,vix:26.5,sp:920,hys:9.67,pcr:0.75},
-  {d:"2009-07",fg:55,vix:24.5,sp:987,hys:8.5,pcr:0.7},
-  {d:"2009-08",fg:60,vix:25.0,sp:1021,hys:7.76,pcr:0.65},
-  {d:"2009-09",fg:65,vix:23.5,sp:1057,hys:7.2,pcr:0.68},
-  {d:"2009-10",fg:58,vix:22.5,sp:1036,hys:6.81,pcr:0.7},
-  {d:"2009-11",fg:62,vix:21.5,sp:1096,hys:6.58,pcr:0.65},
-  {d:"2009-12",fg:68,vix:21.5,sp:1115,hys:6.31,pcr:0.62},
-  {d:"2010-01",fg:55,vix:22.5,sp:1074,hys:6.28,pcr:0.68},
-  {d:"2010-02",fg:55,vix:20.5,sp:1144,hys:6.2,pcr:0.65},
-  {d:"2010-03",fg:62,vix:17.5,sp:1170,hys:5.8,pcr:0.62},
-  {d:"2010-04",fg:68,vix:16.5,sp:1187,hys:5.44,pcr:0.6},
-  {d:"2010-05",fg:28,vix:22.0,sp:1089,hys:6.18,pcr:0.75},
-  {d:"2010-06",fg:30,vix:25.0,sp:1030,hys:6.69,pcr:0.78},
-  {d:"2010-07",fg:45,vix:24.0,sp:1102,hys:6.31,pcr:0.72},
-  {d:"2010-08",fg:38,vix:23.5,sp:1049,hys:5.93,pcr:0.7},
-  {d:"2010-09",fg:55,vix:22.0,sp:1141,hys:5.65,pcr:0.65},
-  {d:"2010-10",fg:65,vix:19.5,sp:1183,hys:5.28,pcr:0.62},
-  {d:"2010-11",fg:55,vix:18.5,sp:1198,hys:5.47,pcr:0.68},
-  {d:"2010-12",fg:68,vix:17.5,sp:1258,hys:5.13,pcr:0.62},
-  {d:"2011-01",fg:68,vix:16.5,sp:1282,hys:4.97,pcr:0.62},
-  {d:"2011-02",fg:70,vix:15.5,sp:1286,hys:4.84,pcr:0.6},
-  {d:"2011-03",fg:65,vix:18.0,sp:1304,hys:4.74,pcr:0.62},
-  {d:"2011-04",fg:68,vix:15.5,sp:1363,hys:4.54,pcr:0.6},
-  {d:"2011-05",fg:55,vix:16.5,sp:1345,hys:4.68,pcr:0.62},
-  {d:"2011-06",fg:45,vix:18.0,sp:1320,hys:4.89,pcr:0.68},
-  {d:"2011-07",fg:35,vix:22.0,sp:1292,hys:5.11,pcr:0.75},
-  {d:"2011-08",fg:8,vix:35.0,sp:1218,hys:6.11,pcr:0.98},
-  {d:"2011-09",fg:5,vix:34.0,sp:1131,hys:6.97,pcr:1.05},
-  {d:"2011-10",fg:42,vix:25.0,sp:1253,hys:6.38,pcr:0.88},
-  {d:"2011-11",fg:22,vix:30.0,sp:1247,hys:7.01,pcr:0.92},
-  {d:"2011-12",fg:28,vix:23.5,sp:1258,hys:7.07,pcr:0.88},
-  {d:"2012-01",fg:42,vix:20.0,sp:1312,hys:6.94,pcr:0.78},
-  {d:"2012-02",fg:62,vix:18.3,sp:1366,hys:6.7,pcr:0.7},
-  {d:"2012-03",fg:72,vix:15.5,sp:1408,hys:6.32,pcr:0.68},
-  {d:"2012-04",fg:62,vix:17.6,sp:1397,hys:6.37,pcr:0.72},
-  {d:"2012-05",fg:28,vix:23.0,sp:1310,hys:7.02,pcr:0.85},
-  {d:"2012-06",fg:38,vix:20.9,sp:1362,hys:6.68,pcr:0.78},
-  {d:"2012-07",fg:52,vix:17.0,sp:1380,hys:6.28,pcr:0.72},
-  {d:"2012-08",fg:62,vix:14.7,sp:1403,hys:5.95,pcr:0.68},
-  {d:"2012-09",fg:68,vix:14.6,sp:1440,hys:5.72,pcr:0.65},
-  {d:"2012-10",fg:52,vix:17.3,sp:1412,hys:5.68,pcr:0.7},
-  {d:"2012-11",fg:55,vix:15.9,sp:1416,hys:5.47,pcr:0.75},
-  {d:"2012-12",fg:65,vix:16.8,sp:1426,hys:5.3,pcr:0.8},
-  {d:"2013-01",fg:75,vix:13.3,sp:1498,hys:5.27,pcr:0.65},
-  {d:"2013-02",fg:72,vix:13.6,sp:1514,hys:5.04,pcr:0.62},
-  {d:"2013-03",fg:75,vix:13.7,sp:1569,hys:4.78,pcr:0.6},
-  {d:"2013-04",fg:78,vix:13.5,sp:1597,hys:4.75,pcr:0.62},
-  {d:"2013-05",fg:78,vix:13.3,sp:1631,hys:4.71,pcr:0.58},
-  {d:"2013-06",fg:52,vix:16.3,sp:1606,hys:5.34,pcr:0.72},
-  {d:"2013-07",fg:72,vix:13.5,sp:1686,hys:5.11,pcr:0.62},
-  {d:"2013-08",fg:55,vix:14.8,sp:1633,hys:5.36,pcr:0.68},
-  {d:"2013-09",fg:62,vix:14.3,sp:1682,hys:5.19,pcr:0.65},
-  {d:"2013-10",fg:75,vix:13.0,sp:1756,hys:4.87,pcr:0.6},
-  {d:"2013-11",fg:78,vix:12.7,sp:1806,hys:4.52,pcr:0.58},
-  {d:"2013-12",fg:82,vix:13.5,sp:1848,hys:4.23,pcr:0.58},
-  {d:"2014-01",fg:48,vix:16.4,sp:1782,hys:4.25,pcr:0.68},
-  {d:"2014-02",fg:65,vix:14.0,sp:1859,hys:4.01,pcr:0.65},
-  {d:"2014-03",fg:62,vix:14.1,sp:1872,hys:3.9,pcr:0.62},
-  {d:"2014-04",fg:62,vix:13.9,sp:1884,hys:3.96,pcr:0.68},
-  {d:"2014-05",fg:68,vix:12.0,sp:1924,hys:3.72,pcr:0.62},
-  {d:"2014-06",fg:72,vix:11.6,sp:1960,hys:3.58,pcr:0.6},
-  {d:"2014-07",fg:55,vix:13.5,sp:1931,hys:3.61,pcr:0.65},
-  {d:"2014-08",fg:72,vix:11.7,sp:2003,hys:3.63,pcr:0.62},
-  {d:"2014-09",fg:60,vix:14.2,sp:1972,hys:3.77,pcr:0.68},
-  {d:"2014-10",fg:32,vix:21.4,sp:2018,hys:4.52,pcr:0.88},
-  {d:"2014-11",fg:68,vix:13.3,sp:2068,hys:4.73,pcr:0.7},
-  {d:"2014-12",fg:58,vix:15.8,sp:2059,hys:5.21,pcr:0.72},
-  {d:"2015-01",fg:42,vix:20.0,sp:1995,hys:5.72,pcr:0.7},
-  {d:"2015-02",fg:70,vix:15.3,sp:2105,hys:5.43,pcr:0.65},
-  {d:"2015-03",fg:58,vix:15.1,sp:2068,hys:5.51,pcr:0.68},
-  {d:"2015-04",fg:62,vix:13.9,sp:2086,hys:5.14,pcr:0.65},
-  {d:"2015-05",fg:65,vix:13.1,sp:2107,hys:5.17,pcr:0.65},
-  {d:"2015-06",fg:52,vix:14.6,sp:2063,hys:5.52,pcr:0.72},
-  {d:"2015-07",fg:60,vix:12.6,sp:2104,hys:5.76,pcr:0.75},
-  {d:"2015-08",fg:22,vix:24.2,sp:1972,hys:6.35,pcr:0.95},
-  {d:"2015-09",fg:18,vix:24.5,sp:1920,hys:6.92,pcr:0.98},
-  {d:"2015-10",fg:52,vix:17.0,sp:2080,hys:6.43,pcr:0.82},
-  {d:"2015-11",fg:55,vix:16.4,sp:2080,hys:6.89,pcr:0.85},
-  {d:"2015-12",fg:38,vix:18.0,sp:2044,hys:7.29,pcr:0.88},
-  {d:"2016-01",fg:20,vix:22.0,sp:1940,hys:7.67,pcr:0.98},
-  {d:"2016-02",fg:22,vix:21.6,sp:1932,hys:7.99,pcr:1.02},
-  {d:"2016-03",fg:52,vix:16.5,sp:2060,hys:7.17,pcr:0.85},
-  {d:"2016-04",fg:58,vix:14.5,sp:2065,hys:6.46,pcr:0.78},
-  {d:"2016-05",fg:55,vix:14.2,sp:2097,hys:6.25,pcr:0.75},
-  {d:"2016-06",fg:35,vix:19.8,sp:2099,hys:6.4,pcr:0.88},
-  {d:"2016-07",fg:72,vix:13.0,sp:2174,hys:5.8,pcr:0.7},
-  {d:"2016-08",fg:75,vix:11.7,sp:2171,hys:5.44,pcr:0.65},
-  {d:"2016-09",fg:65,vix:13.2,sp:2168,hys:5.17,pcr:0.68},
-  {d:"2016-10",fg:45,vix:16.2,sp:2126,hys:4.81,pcr:0.72},
-  {d:"2016-11",fg:78,vix:14.2,sp:2198,hys:4.45,pcr:0.65},
-  {d:"2016-12",fg:82,vix:11.8,sp:2239,hys:4.15,pcr:0.62},
-  {d:"2017-01",fg:75,vix:11.6,sp:2279,hys:3.89,pcr:0.62},
-  {d:"2017-02",fg:80,vix:11.5,sp:2364,hys:3.74,pcr:0.58},
-  {d:"2017-03",fg:72,vix:11.3,sp:2363,hys:3.67,pcr:0.6},
-  {d:"2017-04",fg:70,vix:10.9,sp:2384,hys:3.65,pcr:0.58},
-  {d:"2017-05",fg:78,vix:10.4,sp:2412,hys:3.55,pcr:0.56},
-  {d:"2017-06",fg:68,vix:11.0,sp:2423,hys:3.64,pcr:0.6},
-  {d:"2017-07",fg:75,vix:10.3,sp:2470,hys:3.56,pcr:0.56},
-  {d:"2017-08",fg:62,vix:11.1,sp:2472,hys:3.55,pcr:0.6},
-  {d:"2017-09",fg:68,vix:10.2,sp:2519,hys:3.45,pcr:0.58},
-  {d:"2017-10",fg:78,vix:10.2,sp:2575,hys:3.38,pcr:0.55},
-  {d:"2017-11",fg:80,vix:11.3,sp:2648,hys:3.38,pcr:0.56},
-  {d:"2017-12",fg:75,vix:11.0,sp:2674,hys:3.47,pcr:0.58},
-  {d:"2018-01",fg:73,vix:11.0,sp:2824,hys:3.27,pcr:0.55},
-  {d:"2018-02",fg:8,vix:33.5,sp:2714,hys:3.49,pcr:0.78},
-  {d:"2018-03",fg:14,vix:24.9,sp:2641,hys:3.59,pcr:0.75},
-  {d:"2018-04",fg:35,vix:15.9,sp:2648,hys:3.52,pcr:0.72},
-  {d:"2018-05",fg:45,vix:13.4,sp:2705,hys:3.39,pcr:0.68},
-  {d:"2018-06",fg:50,vix:12.4,sp:2718,hys:3.42,pcr:0.68},
-  {d:"2018-07",fg:58,vix:12.8,sp:2816,hys:3.34,pcr:0.62},
-  {d:"2018-08",fg:55,vix:12.8,sp:2901,hys:3.22,pcr:0.6},
-  {d:"2018-09",fg:60,vix:12.1,sp:2914,hys:3.25,pcr:0.62},
-  {d:"2018-10",fg:12,vix:24.8,sp:2712,hys:3.67,pcr:0.85},
-  {d:"2018-11",fg:18,vix:20.8,sp:2760,hys:4.17,pcr:0.8},
-  {d:"2018-12",fg:3,vix:36.1,sp:2507,hys:5.02,pcr:0.98},
-  {d:"2019-01",fg:45,vix:17.8,sp:2704,hys:4.86,pcr:0.88},
-  {d:"2019-02",fg:60,vix:14.8,sp:2784,hys:4.58,pcr:0.72},
-  {d:"2019-03",fg:48,vix:16.5,sp:2834,hys:4.16,pcr:0.68},
-  {d:"2019-04",fg:68,vix:13.1,sp:2946,hys:3.88,pcr:0.62},
-  {d:"2019-05",fg:25,vix:18.7,sp:2752,hys:4.25,pcr:0.78},
-  {d:"2019-06",fg:70,vix:13.3,sp:2942,hys:3.99,pcr:0.7},
-  {d:"2019-07",fg:62,vix:16.1,sp:2980,hys:3.71,pcr:0.65},
-  {d:"2019-08",fg:22,vix:24.6,sp:2878,hys:3.78,pcr:0.75},
-  {d:"2019-09",fg:65,vix:15.3,sp:2976,hys:3.68,pcr:0.68},
-  {d:"2019-10",fg:72,vix:13.2,sp:3038,hys:3.56,pcr:0.65},
-  {d:"2019-11",fg:85,vix:12.0,sp:3141,hys:3.4,pcr:0.6},
-  {d:"2019-12",fg:93,vix:12.5,sp:3231,hys:3.29,pcr:0.58},
-  {d:"2020-01",fg:60,vix:18.8,sp:3225,hys:3.24,pcr:0.6},
-  {d:"2020-02",fg:25,vix:40.1,sp:2954,hys:4.52,pcr:0.85},
-  {d:"2020-03",fg:2,vix:82.7,sp:2585,hys:10.74,pcr:1.15},
-  {d:"2020-04",fg:38,vix:34.2,sp:2912,hys:8.51,pcr:0.95},
-  {d:"2020-05",fg:52,vix:27.5,sp:3044,hys:7.18,pcr:0.78},
-  {d:"2020-06",fg:55,vix:30.4,sp:3100,hys:6.29,pcr:0.72},
-  {d:"2020-07",fg:60,vix:24.5,sp:3271,hys:5.64,pcr:0.65},
-  {d:"2020-08",fg:72,vix:22.6,sp:3500,hys:4.97,pcr:0.58},
-  {d:"2020-09",fg:50,vix:26.4,sp:3363,hys:5.03,pcr:0.72},
-  {d:"2020-10",fg:38,vix:27.6,sp:3270,hys:5.09,pcr:0.8},
-  {d:"2020-11",fg:90,vix:20.6,sp:3622,hys:4.54,pcr:0.62},
-  {d:"2020-12",fg:84,vix:22.8,sp:3756,hys:4.22,pcr:0.58},
-  {d:"2021-01",fg:55,vix:33.1,sp:3714,hys:4.09,pcr:0.58},
-  {d:"2021-02",fg:60,vix:22.8,sp:3811,hys:3.94,pcr:0.6},
-  {d:"2021-03",fg:52,vix:19.4,sp:3973,hys:3.67,pcr:0.58},
-  {d:"2021-04",fg:58,vix:17.3,sp:4181,hys:3.43,pcr:0.55},
-  {d:"2021-05",fg:42,vix:18.8,sp:4204,hys:3.26,pcr:0.56},
-  {d:"2021-06",fg:48,vix:15.6,sp:4298,hys:3.27,pcr:0.55},
-  {d:"2021-07",fg:30,vix:22.0,sp:4395,hys:3.27,pcr:0.56},
-  {d:"2021-08",fg:40,vix:16.5,sp:4523,hys:3.07,pcr:0.54},
-  {d:"2021-09",fg:28,vix:23.1,sp:4308,hys:3.18,pcr:0.62},
-  {d:"2021-10",fg:65,vix:16.3,sp:4605,hys:3.09,pcr:0.55},
-  {d:"2021-11",fg:35,vix:27.2,sp:4567,hys:3.5,pcr:0.65},
-  {d:"2021-12",fg:42,vix:17.2,sp:4766,hys:3.32,pcr:0.6},
-  {d:"2022-01",fg:30,vix:24.8,sp:4516,hys:3.33,pcr:0.68},
-  {d:"2022-02",fg:25,vix:30.1,sp:4374,hys:3.52,pcr:0.72},
-  {d:"2022-03",fg:28,vix:28.6,sp:4530,hys:3.81,pcr:0.75},
-  {d:"2022-04",fg:35,vix:33.4,sp:4132,hys:4.04,pcr:0.8},
-  {d:"2022-05",fg:15,vix:29.3,sp:4132,hys:4.5,pcr:0.85},
-  {d:"2022-06",fg:14,vix:34.6,sp:3785,hys:5.57,pcr:0.95},
-  {d:"2022-07",fg:42,vix:22.0,sp:4130,hys:4.99,pcr:0.8},
-  {d:"2022-08",fg:38,vix:25.9,sp:3955,hys:4.66,pcr:0.72},
-  {d:"2022-09",fg:18,vix:32.6,sp:3586,hys:5.43,pcr:0.9},
-  {d:"2022-10",fg:45,vix:25.6,sp:3872,hys:5.13,pcr:0.85},
-  {d:"2022-11",fg:55,vix:21.2,sp:4080,hys:4.84,pcr:0.75},
-  {d:"2022-12",fg:35,vix:21.7,sp:3840,hys:4.68,pcr:0.78},
-  {d:"2023-01",fg:55,vix:19.4,sp:4077,hys:4.63,pcr:0.7},
-  {d:"2023-02",fg:62,vix:20.7,sp:3970,hys:4.8,pcr:0.68},
-  {d:"2023-03",fg:32,vix:26.5,sp:4109,hys:4.84,pcr:0.75},
-  {d:"2023-04",fg:55,vix:15.8,sp:4169,hys:4.57,pcr:0.68},
-  {d:"2023-05",fg:65,vix:17.0,sp:4205,hys:4.69,pcr:0.65},
-  {d:"2023-06",fg:75,vix:13.6,sp:4450,hys:4.29,pcr:0.62},
-  {d:"2023-07",fg:80,vix:13.3,sp:4589,hys:3.94,pcr:0.6},
-  {d:"2023-08",fg:48,vix:17.1,sp:4508,hys:3.9,pcr:0.65},
-  {d:"2023-09",fg:30,vix:17.5,sp:4288,hys:3.89,pcr:0.68},
-  {d:"2023-10",fg:25,vix:21.3,sp:4194,hys:4.36,pcr:0.72},
-  {d:"2023-11",fg:62,vix:13.1,sp:4568,hys:3.99,pcr:0.62},
-  {d:"2023-12",fg:75,vix:12.5,sp:4770,hys:3.57,pcr:0.58},
-  {d:"2024-01",fg:72,vix:13.3,sp:4890,hys:3.55,pcr:0.62},
-  {d:"2024-02",fg:75,vix:13.7,sp:5096,hys:3.36,pcr:0.58},
-  {d:"2024-03",fg:70,vix:13.0,sp:5254,hys:3.18,pcr:0.56},
-  {d:"2024-04",fg:35,vix:19.2,sp:5036,hys:3.23,pcr:0.65},
-  {d:"2024-05",fg:52,vix:12.9,sp:5277,hys:3.12,pcr:0.58},
-  {d:"2024-06",fg:55,vix:12.3,sp:5460,hys:3.2,pcr:0.56},
-  {d:"2024-07",fg:52,vix:18.1,sp:5522,hys:3.16,pcr:0.58},
-  {d:"2024-08",fg:28,vix:38.6,sp:5346,hys:3.37,pcr:0.68},
-  {d:"2024-09",fg:65,vix:16.7,sp:5762,hys:3.26,pcr:0.6},
-  {d:"2024-10",fg:60,vix:20.0,sp:5705,hys:2.93,pcr:0.62},
-  {d:"2024-11",fg:65,vix:14.2,sp:6032,hys:2.7,pcr:0.56},
-  {d:"2024-12",fg:32,vix:17.4,sp:5881,hys:2.76,pcr:0.65},
-  {d:"2025-01",fg:48,vix:16.4,sp:6041,hys:2.72,pcr:0.6},
-  {d:"2025-02",fg:25,vix:19.6,sp:5955,hys:2.71,pcr:0.65},
-  {d:"2025-03",fg:8,vix:29.0,sp:5580,hys:3.17,pcr:0.78},
-  {d:"2025-04",fg:4,vix:52.3,sp:5074,hys:4.03,pcr:0.95},
-  {d:"2025-05",fg:40,vix:22.5,sp:5686,hys:3.35,pcr:0.75},
-  {d:"2025-06",fg:55,vix:16.8,sp:5950,hys:3.13,pcr:0.65},
-  {d:"2025-07",fg:62,vix:15.5,sp:6100,hys:2.89,pcr:0.62},
-  {d:"2025-08",fg:58,vix:16.2,sp:6202,hys:2.9,pcr:0.6},
-  {d:"2025-09",fg:50,vix:17.8,sp:6350,hys:2.79,pcr:0.62},
-  {d:"2025-10",fg:45,vix:19.5,sp:6480,hys:2.92,pcr:0.65},
-  {d:"2025-11",fg:55,vix:16.1,sp:6620,hys:3.08,pcr:0.6},
-  {d:"2025-12",fg:48,vix:17.9,sp:6850,hys:2.89,pcr:0.62},
-  {d:"2026-01",fg:55,vix:16.0,sp:7002,hys:2.74,pcr:0.58},
-  {d:"2026-02",fg:35,vix:19.8,sp:6780,hys:2.92,pcr:0.68},
-  {d:"2026-03",fg:20,vix:25.7,sp:6776,hys:3.13,pcr:0.82}
+  {d:"2000-01",fg:75,vix:24.2,sp:1394,hys:4.78,pcr:0.68,spi:4717,spTr:1920,spTrChf:3051,spDdMax:-3.2,spiDdMax:0.0},
+  {d:"2000-02",fg:70,vix:26.1,sp:1366,hys:4.9,pcr:0.65,spi:4751,spTr:1884,spTrChf:3002,spDdMax:-5.0,spiDdMax:0.0},
+  {d:"2000-03",fg:72,vix:26.8,sp:1499,hys:5.37,pcr:0.62,spi:5076,spTr:2068,spTrChf:3457,spDdMax:-10.1,spiDdMax:0.0},
+  {d:"2000-04",fg:45,vix:23.2,sp:1452,hys:5.85,pcr:0.75,spi:5076,spTr:2006,spTrChf:3428,spDdMax:-10.6,spiDdMax:0.0},
+  {d:"2000-05",fg:38,vix:20.8,sp:1421,hys:5.9,pcr:0.78,spi:5270,spTr:1964,spTrChf:3375,spDdMax:-9.2,spiDdMax:0.0},
+  {d:"2000-06",fg:55,vix:23.5,sp:1455,hys:6.14,pcr:0.72,spi:5293,spTr:2013,spTrChf:3402,spDdMax:-5.2,spiDdMax:0.0},
+  {d:"2000-07",fg:48,vix:20.4,sp:1431,hys:6.12,pcr:0.7,spi:5504,spTr:1981,spTrChf:3342,spDdMax:-5.7,spiDdMax:0.0},
+  {d:"2000-08",fg:52,vix:20.5,sp:1517,hys:6.36,pcr:0.68,spi:5682,spTr:2104,spTrChf:3607,spDdMax:-6.1,spiDdMax:0.0},
+  {d:"2000-09",fg:35,vix:22.8,sp:1448,hys:6.45,pcr:0.78,spi:5424,spTr:1993,spTrChf:3489,spDdMax:-6.5,spiDdMax:-4.5},
+  {d:"2000-10",fg:25,vix:28.3,sp:1363,hys:7.29,pcr:0.88,spi:5573,spTr:1985,spTrChf:3553,spDdMax:-14.0,spiDdMax:-1.9},
+  {d:"2000-11",fg:20,vix:27.2,sp:1315,hys:8.09,pcr:0.92,spi:5533,spTr:1828,spTrChf:3239,spDdMax:-14.7,spiDdMax:-2.6},
+  {d:"2000-12",fg:28,vix:24.4,sp:1321,hys:9.01,pcr:0.85,spi:5621,spTr:1837,spTrChf:3273,spDdMax:-17.4,spiDdMax:-1.1},
+  {d:"2001-01",fg:45,vix:26.5,sp:1366,hys:8.46,pcr:0.82,spi:5564,spTr:1903,spTrChf:3205,spDdMax:-16.0,spiDdMax:-2.1},
+  {d:"2001-02",fg:32,vix:25.4,sp:1240,hys:7.61,pcr:0.88,spi:5321,spTr:1729,spTrChf:2844,spDdMax:-19.9,spiDdMax:-6.4},
+  {d:"2001-03",fg:15,vix:28.5,sp:1160,hys:7.92,pcr:0.95,spi:4952,spTr:1620,spTrChf:2726,spDdMax:-28.8,spiDdMax:-12.8},
+  {d:"2001-04",fg:52,vix:24.4,sp:1249,hys:8.5,pcr:0.8,spi:5064,spTr:1745,spTrChf:3000,spDdMax:-28.0,spiDdMax:-10.9},
+  {d:"2001-05",fg:55,vix:21.2,sp:1255,hys:7.69,pcr:0.75,spi:5183,spTr:1757,spTrChf:3110,spDdMax:-18.8,spiDdMax:-8.8},
+  {d:"2001-06",fg:38,vix:23.0,sp:1224,hys:8.06,pcr:0.8,spi:5007,spTr:1714,spTrChf:3095,spDdMax:-20.7,spiDdMax:-11.9},
+  {d:"2001-07",fg:30,vix:23.8,sp:1211,hys:8.26,pcr:0.85,spi:4733,spTr:1697,spTrChf:2997,spDdMax:-23.2,spiDdMax:-16.7},
+  {d:"2001-08",fg:22,vix:24.2,sp:1148,hys:8.05,pcr:0.88,spi:4541,spTr:1591,spTrChf:2727,spDdMax:-25.9,spiDdMax:-20.1},
+  {d:"2001-09",fg:5,vix:38.5,sp:1040,hys:9.24,pcr:1.1,spi:4086,spTr:1463,spTrChf:2427,spDdMax:-37.8,spiDdMax:-28.1},
+  {d:"2001-10",fg:18,vix:35.6,sp:1060,hys:9.8,pcr:1.05,spi:4138,spTr:1491,spTrChf:2469,spDdMax:-32.3,spiDdMax:-27.2},
+  {d:"2001-11",fg:38,vix:28.5,sp:1139,hys:8.79,pcr:0.9,spi:4260,spTr:1605,spTrChf:2635,spDdMax:-30.5,spiDdMax:-25.0},
+  {d:"2001-12",fg:50,vix:23.0,sp:1148,hys:8.29,pcr:0.82,spi:4383,spTr:1619,spTrChf:2685,spDdMax:-26.6,spiDdMax:-22.9},
+  {d:"2002-01",fg:52,vix:22.2,sp:1130,hys:8.15,pcr:0.82,spi:4265,spTr:1595,spTrChf:2709,spDdMax:-28.7,spiDdMax:-24.9},
+  {d:"2002-02",fg:45,vix:22.5,sp:1107,hys:8.1,pcr:0.85,spi:4333,spTr:1565,spTrChf:2633,spDdMax:-29.2,spiDdMax:-23.7},
+  {d:"2002-03",fg:55,vix:20.8,sp:1147,hys:7.33,pcr:0.78,spi:4562,spTr:1623,spTrChf:2725,spDdMax:-27.1,spiDdMax:-19.7},
+  {d:"2002-04",fg:42,vix:20.8,sp:1074,hys:7.16,pcr:0.82,spi:4519,spTr:1525,spTrChf:2502,spDdMax:-29.9,spiDdMax:-20.5},
+  {d:"2002-05",fg:38,vix:21.0,sp:1067,hys:7.03,pcr:0.88,spi:4546,spTr:1514,spTrChf:2408,spDdMax:-30.9,spiDdMax:-20.0},
+  {d:"2002-06",fg:18,vix:26.0,sp:990,hys:7.98,pcr:0.98,spi:4147,spTr:1406,spTrChf:2188,spDdMax:-37.2,spiDdMax:-27.0},
+  {d:"2002-07",fg:8,vix:38.5,sp:862,hys:9.36,pcr:1.05,spi:3623,spTr:1296,spTrChf:1948,spDdMax:-48.9,spiDdMax:-36.2},
+  {d:"2002-08",fg:15,vix:32.2,sp:917,hys:9.79,pcr:1.02,spi:3652,spTr:1305,spTrChf:1933,spDdMax:-45.1,spiDdMax:-35.7},
+  {d:"2002-09",fg:5,vix:40.5,sp:815,hys:9.85,pcr:1.12,spi:3336,spTr:1163,spTrChf:1726,spDdMax:-49.1,spiDdMax:-41.3},
+  {d:"2002-10",fg:20,vix:38.0,sp:885,hys:10.68,pcr:1.08,spi:3443,spTr:1265,spTrChf:1900,spDdMax:-46.7,spiDdMax:-39.4},
+  {d:"2002-11",fg:35,vix:27.2,sp:936,hys:9.65,pcr:0.95,spi:3562,spTr:1340,spTrChf:1953,spDdMax:-41.5,spiDdMax:-37.3},
+  {d:"2002-12",fg:20,vix:27.5,sp:879,hys:8.96,pcr:0.92,spi:3246,spTr:1261,spTrChf:1755,spDdMax:-40.7,spiDdMax:-42.9},
+  {d:"2003-01",fg:22,vix:27.2,sp:896,hys:8.18,pcr:0.92,spi:3090,spTr:1228,spTrChf:1682,spDdMax:-40.5,spiDdMax:-45.6},
+  {d:"2003-02",fg:18,vix:30.5,sp:841,hys:8.43,pcr:0.98,spi:2907,spTr:1210,spTrChf:1660,spDdMax:-43.0,spiDdMax:-48.8},
+  {d:"2003-03",fg:15,vix:32.8,sp:800,hys:8.04,pcr:1.02,spi:2882,spTr:1221,spTrChf:1668,spDdMax:-44.6,spiDdMax:-49.3},
+  {d:"2003-04",fg:45,vix:25.8,sp:880,hys:7.02,pcr:0.88,spi:3235,spTr:1322,spTrChf:1765,spDdMax:-38.4,spiDdMax:-43.1},
+  {d:"2003-05",fg:55,vix:21.2,sp:929,hys:6.64,pcr:0.78,spi:3311,spTr:1392,spTrChf:1864,spDdMax:-34.8,spiDdMax:-41.7},
+  {d:"2003-06",fg:58,vix:20.0,sp:975,hys:6.34,pcr:0.72,spi:3438,spTr:1409,spTrChf:1859,spDdMax:-31.6,spiDdMax:-39.5},
+  {d:"2003-07",fg:62,vix:18.5,sp:990,hys:5.86,pcr:0.68,spi:3620,spTr:1434,spTrChf:1939,spDdMax:-30.3,spiDdMax:-36.3},
+  {d:"2003-08",fg:65,vix:18.5,sp:1008,hys:5.82,pcr:0.65,spi:3675,spTr:1462,spTrChf:1997,spDdMax:-28.5,spiDdMax:-35.3},
+  {d:"2003-09",fg:58,vix:18.5,sp:996,hys:5.36,pcr:0.68,spi:3626,spTr:1447,spTrChf:1936,spDdMax:-29.5,spiDdMax:-36.2},
+  {d:"2003-10",fg:65,vix:16.5,sp:1050,hys:4.92,pcr:0.65,spi:3769,spTr:1529,spTrChf:2022,spDdMax:-25.6,spiDdMax:-33.7},
+  {d:"2003-11",fg:70,vix:15.8,sp:1058,hys:4.62,pcr:0.62,spi:3843,spTr:1542,spTrChf:1987,spDdMax:-24.7,spiDdMax:-32.4},
+  {d:"2003-12",fg:75,vix:15.5,sp:1112,hys:4.28,pcr:0.6,spi:3962,spTr:1623,spTrChf:2007,spDdMax:-22.9,spiDdMax:-30.3},
+  {d:"2004-01",fg:72,vix:15.2,sp:1132,hys:3.94,pcr:0.62,spi:4152,spTr:1653,spTrChf:2071,spDdMax:-22.0,spiDdMax:-26.9},
+  {d:"2004-02",fg:68,vix:14.8,sp:1145,hys:4.26,pcr:0.6,spi:4221,spTr:1676,spTrChf:2107,spDdMax:-21.1,spiDdMax:-25.7},
+  {d:"2004-03",fg:62,vix:16.5,sp:1126,hys:4.4,pcr:0.65,spi:4098,spTr:1650,spTrChf:2089,spDdMax:-20.8,spiDdMax:-27.9},
+  {d:"2004-04",fg:52,vix:15.8,sp:1108,hys:3.98,pcr:0.68,spi:4252,spTr:1625,spTrChf:2103,spDdMax:-18.1,spiDdMax:-25.2},
+  {d:"2004-05",fg:48,vix:15.5,sp:1121,hys:4.25,pcr:0.65,spi:4161,spTr:1647,spTrChf:2064,spDdMax:-18.1,spiDdMax:-26.8},
+  {d:"2004-06",fg:55,vix:16.5,sp:1141,hys:4.07,pcr:0.62,spi:4166,spTr:1679,spTrChf:2099,spDdMax:-17.5,spiDdMax:-26.7},
+  {d:"2004-07",fg:48,vix:16.0,sp:1102,hys:4.01,pcr:0.65,spi:4099,spTr:1623,spTrChf:2080,spDdMax:-17.3,spiDdMax:-27.9},
+  {d:"2004-08",fg:50,vix:14.5,sp:1104,hys:4.08,pcr:0.62,spi:4016,spTr:1630,spTrChf:2065,spDdMax:-16.6,spiDdMax:-29.3},
+  {d:"2004-09",fg:52,vix:14.2,sp:1115,hys:3.87,pcr:0.6,spi:4057,spTr:1647,spTrChf:2051,spDdMax:-14.8,spiDdMax:-28.6},
+  {d:"2004-10",fg:58,vix:14.5,sp:1130,hys:3.73,pcr:0.62,spi:3987,spTr:1673,spTrChf:1994,spDdMax:-13.3,spiDdMax:-29.8},
+  {d:"2004-11",fg:65,vix:13.5,sp:1174,hys:3.29,pcr:0.6,spi:4053,spTr:1740,spTrChf:1983,spDdMax:-10.7,spiDdMax:-28.7},
+  {d:"2004-12",fg:70,vix:13.2,sp:1212,hys:3.1,pcr:0.58,spi:4235,spTr:1800,spTrChf:2053,spDdMax:-9.3,spiDdMax:-25.5},
+  {d:"2005-01",fg:60,vix:13.2,sp:1181,hys:3.2,pcr:0.6,spi:4306,spTr:1756,spTrChf:2086,spDdMax:-9.8,spiDdMax:-24.2},
+  {d:"2005-02",fg:62,vix:12.5,sp:1203,hys:3.05,pcr:0.58,spi:4436,spTr:1793,spTrChf:2087,spDdMax:-8.1,spiDdMax:-21.9},
+  {d:"2005-03",fg:55,vix:13.0,sp:1181,hys:2.98,pcr:0.62,spi:4457,spTr:1761,spTrChf:2106,spDdMax:-8.0,spiDdMax:-21.6},
+  {d:"2005-04",fg:42,vix:14.5,sp:1156,hys:3.78,pcr:0.68,spi:4444,spTr:1727,spTrChf:2063,spDdMax:-9.0,spiDdMax:-21.8},
+  {d:"2005-05",fg:50,vix:13.5,sp:1191,hys:4.23,pcr:0.65,spi:4645,spTr:1782,spTrChf:2223,spDdMax:-7.1,spiDdMax:-18.3},
+  {d:"2005-06",fg:52,vix:12.5,sp:1191,hys:3.9,pcr:0.62,spi:4752,spTr:1785,spTrChf:2290,spDdMax:-7.9,spiDdMax:-16.4},
+  {d:"2005-07",fg:60,vix:12.0,sp:1235,hys:3.49,pcr:0.58,spi:5025,spTr:1850,spTrChf:2384,spDdMax:-5.7,spiDdMax:-11.6},
+  {d:"2005-08",fg:62,vix:12.0,sp:1220,hys:3.52,pcr:0.58,spi:4977,spTr:1843,spTrChf:2310,spDdMax:-5.9,spiDdMax:-12.4},
+  {d:"2005-09",fg:55,vix:14.5,sp:1228,hys:3.47,pcr:0.6,spi:5271,spTr:1855,spTrChf:2399,spDdMax:-6.0,spiDdMax:-7.2},
+  {d:"2005-10",fg:42,vix:16.5,sp:1207,hys:3.57,pcr:0.65,spi:5338,spTr:1822,spTrChf:2350,spDdMax:-7.3,spiDdMax:-6.1},
+  {d:"2005-11",fg:55,vix:12.8,sp:1249,hys:3.37,pcr:0.62,spi:5602,spTr:1897,spTrChf:2492,spDdMax:-4.1,spiDdMax:-1.4},
+  {d:"2005-12",fg:62,vix:12.0,sp:1248,hys:3.16,pcr:0.6,spi:5742,spTr:1931,spTrChf:2537,spDdMax:-2.9,spiDdMax:0.0},
+  {d:"2006-01",fg:68,vix:12.5,sp:1280,hys:3.17,pcr:0.6,spi:5929,spTr:1987,spTrChf:2540,spDdMax:-2.3,spiDdMax:0.0},
+  {d:"2006-02",fg:65,vix:11.5,sp:1281,hys:2.99,pcr:0.58,spi:6012,spTr:2003,spTrChf:2626,spDdMax:-2.5,spiDdMax:0.0},
+  {d:"2006-03",fg:70,vix:11.8,sp:1294,hys:3.01,pcr:0.6,spi:6163,spTr:2022,spTrChf:2637,spDdMax:-2.9,spiDdMax:0.0},
+  {d:"2006-04",fg:72,vix:12.5,sp:1310,hys:3.04,pcr:0.62,spi:6252,spTr:2062,spTrChf:2555,spDdMax:-3.9,spiDdMax:0.0},
+  {d:"2006-05",fg:38,vix:17.5,sp:1270,hys:3.4,pcr:0.72,spi:5925,spTr:1984,spTrChf:2416,spDdMax:-8.1,spiDdMax:-5.2},
+  {d:"2006-06",fg:42,vix:17.5,sp:1270,hys:3.37,pcr:0.75,spi:5956,spTr:1985,spTrChf:2428,spDdMax:-7.6,spiDdMax:-4.7},
+  {d:"2006-07",fg:52,vix:16.0,sp:1304,hys:3.12,pcr:0.68,spi:6175,spTr:2028,spTrChf:2495,spDdMax:-6.1,spiDdMax:-1.2},
+  {d:"2006-08",fg:65,vix:12.5,sp:1304,hys:2.96,pcr:0.62,spi:6358,spTr:2083,spTrChf:2564,spDdMax:-3.1,spiDdMax:0.0},
+  {d:"2006-09",fg:68,vix:11.5,sp:1336,hys:2.88,pcr:0.58,spi:6568,spTr:2121,spTrChf:2657,spDdMax:-2.6,spiDdMax:0.0},
+  {d:"2006-10",fg:72,vix:11.0,sp:1377,hys:2.8,pcr:0.56,spi:6700,spTr:2187,spTrChf:2720,spDdMax:-0.8,spiDdMax:0.0},
+  {d:"2006-11",fg:68,vix:11.5,sp:1401,hys:2.73,pcr:0.58,spi:6664,spTr:2225,spTrChf:2664,spDdMax:-0.5,spiDdMax:-0.5},
+  {d:"2006-12",fg:70,vix:11.0,sp:1418,hys:2.72,pcr:0.56,spi:6929,spTr:2258,spTrChf:2752,spDdMax:-0.5,spiDdMax:0.0},
+  {d:"2007-01",fg:72,vix:10.8,sp:1438,hys:2.65,pcr:0.56,spi:7242,spTr:2289,spTrChf:2849,spDdMax:-0.5,spiDdMax:0.0},
+  {d:"2007-02",fg:65,vix:11.5,sp:1407,hys:2.56,pcr:0.58,spi:6974,spTr:2310,spTrChf:2816,spDdMax:-0.9,spiDdMax:-3.7},
+  {d:"2007-03",fg:60,vix:14.5,sp:1421,hys:2.6,pcr:0.65,spi:7184,spTr:2336,spTrChf:2839,spDdMax:-5.9,spiDdMax:-0.8},
+  {d:"2007-04",fg:68,vix:13.0,sp:1482,hys:2.55,pcr:0.6,spi:7620,spTr:2434,spTrChf:2936,spDdMax:-3.2,spiDdMax:0.0},
+  {d:"2007-05",fg:72,vix:12.5,sp:1531,hys:2.54,pcr:0.58,spi:7682,spTr:2501,spTrChf:3064,spDdMax:-2.0,spiDdMax:0.0},
+  {d:"2007-06",fg:55,vix:16.0,sp:1503,hys:2.85,pcr:0.68,spi:7514,spTr:2469,spTrChf:3016,spDdMax:-3.4,spiDdMax:-2.2},
+  {d:"2007-07",fg:55,vix:20.5,sp:1455,hys:3.56,pcr:0.75,spi:7272,spTr:2490,spTrChf:2991,spDdMax:-5.4,spiDdMax:-5.3},
+  {d:"2007-08",fg:30,vix:30.0,sp:1474,hys:4.0,pcr:0.85,spi:7231,spTr:2490,spTrChf:3008,spDdMax:-10.5,spiDdMax:-5.9},
+  {d:"2007-09",fg:45,vix:20.0,sp:1527,hys:3.83,pcr:0.72,spi:7263,spTr:2573,spTrChf:2992,spDdMax:-5.4,spiDdMax:-5.5},
+  {d:"2007-10",fg:62,vix:18.0,sp:1549,hys:3.55,pcr:0.68,spi:7372,spTr:2671,spTrChf:3097,spDdMax:-3.4,spiDdMax:-4.0},
+  {d:"2007-11",fg:25,vix:26.0,sp:1481,hys:4.34,pcr:0.82,spi:7155,spTr:2538,spTrChf:2873,spDdMax:-8.8,spiDdMax:-6.9},
+  {d:"2007-12",fg:28,vix:22.5,sp:1468,hys:5.01,pcr:0.88,spi:6925,spTr:2556,spTrChf:2893,spDdMax:-9.4,spiDdMax:-9.9},
+  {d:"2008-01",fg:15,vix:26.5,sp:1378,hys:5.99,pcr:0.92,spi:6234,spTr:2398,spTrChf:2592,spDdMax:-14.6,spiDdMax:-18.8},
+  {d:"2008-02",fg:18,vix:25.0,sp:1330,hys:6.22,pcr:0.88,spi:6189,spTr:2367,spTrChf:2467,spDdMax:-14.9,spiDdMax:-19.4},
+  {d:"2008-03",fg:12,vix:28.0,sp:1323,hys:6.78,pcr:0.95,spi:5961,spTr:2351,spTrChf:2338,spDdMax:-19.0,spiDdMax:-22.4},
+  {d:"2008-04",fg:38,vix:20.5,sp:1385,hys:6.23,pcr:0.78,spi:6295,spTr:2459,spTrChf:2545,spDdMax:-14.1,spiDdMax:-18.1},
+  {d:"2008-05",fg:48,vix:18.5,sp:1400,hys:5.98,pcr:0.72,spi:6334,spTr:2485,spTrChf:2592,spDdMax:-11.5,spiDdMax:-17.5},
+  {d:"2008-06",fg:15,vix:23.0,sp:1280,hys:6.82,pcr:0.88,spi:5856,spTr:2303,spTrChf:2351,spDdMax:-17.3,spiDdMax:-23.8},
+  {d:"2008-07",fg:10,vix:24.5,sp:1267,hys:7.32,pcr:0.9,spi:5964,spTr:2266,spTrChf:2374,spDdMax:-21.0,spiDdMax:-22.4},
+  {d:"2008-08",fg:18,vix:21.0,sp:1283,hys:7.05,pcr:0.82,spi:6062,spTr:2285,spTrChf:2509,spDdMax:-18.6,spiDdMax:-21.1},
+  {d:"2008-09",fg:5,vix:36.2,sp:1166,hys:8.34,pcr:1.02,spi:5564,spTr:2055,spTrChf:2303,spDdMax:-28.3,spiDdMax:-27.6},
+  {d:"2008-10",fg:2,vix:59.9,sp:968,hys:14.44,pcr:1.25,spi:5045,spTr:1674,spTrChf:1941,spDdMax:-42.0,spiDdMax:-34.3},
+  {d:"2008-11",fg:5,vix:65.0,sp:896,hys:16.81,pcr:1.18,spi:4780,spTr:1530,spTrChf:1856,spDdMax:-46.0,spiDdMax:-37.8},
+  {d:"2008-12",fg:8,vix:45.0,sp:903,hys:18.7,pcr:1.1,spi:4568,spTr:1583,spTrChf:1651,spDdMax:-41.9,spiDdMax:-40.5},
+  {d:"2009-01",fg:5,vix:44.2,sp:931,hys:17.71,pcr:1.08,spi:4376,spTr:1449,spTrChf:1699,spDdMax:-45.5,spiDdMax:-43.0},
+  {d:"2009-02",fg:3,vix:46.0,sp:826,hys:17.32,pcr:1.12,spi:3930,spTr:1274,spTrChf:1490,spDdMax:-52.5,spiDdMax:-48.8},
+  {d:"2009-03",fg:8,vix:42.0,sp:798,hys:16.22,pcr:1.05,spi:4137,spTr:1371,spTrChf:1561,spDdMax:-53.4,spiDdMax:-46.1},
+  {d:"2009-04",fg:35,vix:35.0,sp:873,hys:13.09,pcr:0.88,spi:4488,spTr:1488,spTrChf:1697,spDdMax:-46.1,spiDdMax:-41.6},
+  {d:"2009-05",fg:48,vix:28.0,sp:919,hys:11.17,pcr:0.78,spi:4615,spTr:1578,spTrChf:1686,spDdMax:-40.2,spiDdMax:-39.9},
+  {d:"2009-06",fg:42,vix:26.5,sp:920,hys:9.67,pcr:0.75,spi:4663,spTr:1564,spTrChf:1698,spDdMax:-38.7,spiDdMax:-39.3},
+  {d:"2009-07",fg:55,vix:24.5,sp:987,hys:8.5,pcr:0.7,spi:5109,spTr:1699,spTrChf:1815,spDdMax:-33.8,spiDdMax:-33.5},
+  {d:"2009-08",fg:60,vix:25.0,sp:1021,hys:7.76,pcr:0.65,spi:5346,spTr:1808,spTrChf:1913,spDdMax:-30.4,spiDdMax:-30.4},
+  {d:"2009-09",fg:65,vix:23.5,sp:1057,hys:7.2,pcr:0.68,spi:5461,spTr:1876,spTrChf:1941,spDdMax:-27.1,spiDdMax:-28.9},
+  {d:"2009-10",fg:58,vix:22.5,sp:1036,hys:6.81,pcr:0.7,spi:5403,spTr:1896,spTrChf:1946,spDdMax:-26.3,spiDdMax:-29.7},
+  {d:"2009-11",fg:62,vix:21.5,sp:1096,hys:6.58,pcr:0.65,spi:5388,spTr:1983,spTrChf:1989,spDdMax:-23.3,spiDdMax:-29.9},
+  {d:"2009-12",fg:68,vix:21.5,sp:1115,hys:6.31,pcr:0.62,spi:5626,spTr:2019,spTrChf:2088,spDdMax:-22.8,spiDdMax:-26.8},
+  {d:"2010-01",fg:55,vix:22.5,sp:1074,hys:6.28,pcr:0.68,spi:5570,spTr:1965,spTrChf:2083,spDdMax:-22.7,spiDdMax:-27.5},
+  {d:"2010-02",fg:55,vix:20.5,sp:1144,hys:6.2,pcr:0.65,spi:5763,spTr:2050,spTrChf:2200,spDdMax:-19.7,spiDdMax:-25.0},
+  {d:"2010-03",fg:62,vix:17.5,sp:1170,hys:5.8,pcr:0.62,spi:6008,spTr:2155,spTrChf:2271,spDdMax:-17.0,spiDdMax:-21.8},
+  {d:"2010-04",fg:68,vix:16.5,sp:1187,hys:5.44,pcr:0.6,spi:5847,spTr:2210,spTrChf:2377,spDdMax:-14.5,spiDdMax:-23.9},
+  {d:"2010-05",fg:28,vix:22.0,sp:1089,hys:6.18,pcr:0.75,spi:5562,spTr:2081,spTrChf:2406,spDdMax:-16.0,spiDdMax:-27.6},
+  {d:"2010-06",fg:30,vix:25.0,sp:1030,hys:6.69,pcr:0.78,spi:5408,spTr:2049,spTrChf:2208,spDdMax:-16.5,spiDdMax:-29.6},
+  {d:"2010-07",fg:45,vix:24.0,sp:1102,hys:6.31,pcr:0.72,spi:5490,spTr:2196,spTrChf:2287,spDdMax:-16.5,spiDdMax:-28.5},
+  {d:"2010-08",fg:38,vix:23.5,sp:1049,hys:5.93,pcr:0.7,spi:5465,spTr:2133,spTrChf:2187,spDdMax:-14.5,spiDdMax:-28.9},
+  {d:"2010-09",fg:55,vix:22.0,sp:1141,hys:5.65,pcr:0.65,spi:5595,spTr:2290,spTrChf:2237,spDdMax:-12.4,spiDdMax:-27.2},
+  {d:"2010-10",fg:65,vix:19.5,sp:1183,hys:5.28,pcr:0.62,spi:5755,spTr:2386,spTrChf:2362,spDdMax:-9.0,spiDdMax:-25.1},
+  {d:"2010-11",fg:55,vix:18.5,sp:1198,hys:5.47,pcr:0.68,spi:5652,spTr:2344,spTrChf:2347,spDdMax:-9.6,spiDdMax:-26.4},
+  {d:"2010-12",fg:68,vix:17.5,sp:1258,hys:5.13,pcr:0.62,spi:5791,spTr:2480,spTrChf:2318,spDdMax:-7.9,spiDdMax:-24.6},
+  {d:"2011-01",fg:68,vix:16.5,sp:1282,hys:4.97,pcr:0.62,spi:5815,spTr:2538,spTrChf:2390,spDdMax:-7.2,spiDdMax:-24.3},
+  {d:"2011-02",fg:70,vix:15.5,sp:1286,hys:4.84,pcr:0.6,spi:5952,spTr:2605,spTrChf:2417,spDdMax:-5.8,spiDdMax:-22.5},
+  {d:"2011-03",fg:65,vix:18.0,sp:1304,hys:4.74,pcr:0.62,spi:5792,spTr:2606,spTrChf:2394,spDdMax:-5.9,spiDdMax:-24.6},
+  {d:"2011-04",fg:68,vix:15.5,sp:1363,hys:4.54,pcr:0.6,spi:6013,spTr:2674,spTrChf:2334,spDdMax:-4.1,spiDdMax:-21.7},
+  {d:"2011-05",fg:55,vix:16.5,sp:1345,hys:4.68,pcr:0.62,spi:6023,spTr:2675,spTrChf:2276,spDdMax:-4.3,spiDdMax:-21.6},
+  {d:"2011-06",fg:45,vix:18.0,sp:1320,hys:4.89,pcr:0.68,spi:5684,spTr:2631,spTrChf:2192,spDdMax:-6.7,spiDdMax:-26.0},
+  {d:"2011-07",fg:35,vix:22.0,sp:1292,hys:5.11,pcr:0.75,spi:5315,spTr:2567,spTrChf:2057,spDdMax:-9.7,spiDdMax:-30.8},
+  {d:"2011-08",fg:8,vix:35.0,sp:1218,hys:6.11,pcr:0.98,spi:5049,spTr:2403,spTrChf:1968,spDdMax:-17.5,spiDdMax:-34.3},
+  {d:"2011-09",fg:5,vix:34.0,sp:1131,hys:6.97,pcr:1.05,spi:5006,spTr:2228,spTrChf:2000,spDdMax:-19.3,spiDdMax:-34.8},
+  {d:"2011-10",fg:42,vix:25.0,sp:1253,hys:6.38,pcr:0.88,spi:5212,spTr:2441,spTrChf:2105,spDdMax:-17.5,spiDdMax:-32.2},
+  {d:"2011-11",fg:22,vix:30.0,sp:1247,hys:7.01,pcr:0.92,spi:5131,spTr:2362,spTrChf:2176,spDdMax:-13.3,spiDdMax:-33.2},
+  {d:"2011-12",fg:28,vix:23.5,sp:1258,hys:7.07,pcr:0.88,spi:5344,spTr:2403,spTrChf:2259,spDdMax:-13.0,spiDdMax:-30.4},
+  {d:"2012-01",fg:42,vix:20.0,sp:1312,hys:6.94,pcr:0.78,spi:5412,spTr:2524,spTrChf:2305,spDdMax:-10.7,spiDdMax:-29.5},
+  {d:"2012-02",fg:62,vix:18.3,sp:1366,hys:6.7,pcr:0.7,spi:5584,spTr:2637,spTrChf:2358,spDdMax:-8.0,spiDdMax:-27.3},
+  {d:"2012-03",fg:72,vix:15.5,sp:1408,hys:6.32,pcr:0.68,spi:5716,spTr:2701,spTrChf:2435,spDdMax:-5.8,spiDdMax:-25.6},
+  {d:"2012-04",fg:62,vix:17.6,sp:1397,hys:6.37,pcr:0.72,spi:5697,spTr:2701,spTrChf:2450,spDdMax:-5.9,spiDdMax:-25.8},
+  {d:"2012-05",fg:28,vix:23.0,sp:1310,hys:7.02,pcr:0.85,spi:5456,spTr:2563,spTrChf:2488,spDdMax:-10.1,spiDdMax:-29.0},
+  {d:"2012-06",fg:38,vix:20.9,sp:1362,hys:6.68,pcr:0.78,spi:5633,spTr:2641,spTrChf:2503,spDdMax:-9.9,spiDdMax:-26.7},
+  {d:"2012-07",fg:52,vix:17.0,sp:1380,hys:6.28,pcr:0.72,spi:5915,spTr:2699,spTrChf:2644,spDdMax:-8.0,spiDdMax:-23.0},
+  {d:"2012-08",fg:62,vix:14.7,sp:1403,hys:5.95,pcr:0.68,spi:5904,spTr:2779,spTrChf:2667,spDdMax:-6.4,spiDdMax:-23.1},
+  {d:"2012-09",fg:68,vix:14.6,sp:1440,hys:5.72,pcr:0.65,spi:6011,spTr:2826,spTrChf:2659,spDdMax:-5.5,spiDdMax:-21.8},
+  {d:"2012-10",fg:52,vix:17.3,sp:1412,hys:5.68,pcr:0.7,spi:6089,spTr:2776,spTrChf:2588,spDdMax:-5.2,spiDdMax:-20.7},
+  {d:"2012-11",fg:55,vix:15.9,sp:1416,hys:5.47,pcr:0.75,spi:6275,spTr:2808,spTrChf:2605,spDdMax:-6.6,spiDdMax:-18.3},
+  {d:"2012-12",fg:65,vix:16.8,sp:1426,hys:5.3,pcr:0.8,spi:6291,spTr:2869,spTrChf:2618,spDdMax:-7.7,spiDdMax:-18.1},
+  {d:"2013-01",fg:75,vix:13.3,sp:1498,hys:5.27,pcr:0.65,spi:6789,spTr:2634,spTrChf:2400,spDdMax:-5.7,spiDdMax:-11.6},
+  {d:"2013-02",fg:72,vix:13.6,sp:1514,hys:5.04,pcr:0.62,spi:7025,spTr:2670,spTrChf:2479,spDdMax:-5.2,spiDdMax:-8.6},
+  {d:"2013-03",fg:75,vix:13.7,sp:1569,hys:4.78,pcr:0.6,spi:7243,spTr:2770,spTrChf:2632,spDdMax:-4.6,spiDdMax:-5.7},
+  {d:"2013-04",fg:78,vix:13.5,sp:1597,hys:4.75,pcr:0.62,spi:7425,spTr:2823,spTrChf:2645,spDdMax:-3.6,spiDdMax:-3.3},
+  {d:"2013-05",fg:78,vix:13.3,sp:1631,hys:4.71,pcr:0.58,spi:7495,spTr:2889,spTrChf:2755,spDdMax:-3.5,spiDdMax:-2.4},
+  {d:"2013-06",fg:52,vix:16.3,sp:1606,hys:5.34,pcr:0.72,spi:7248,spTr:2851,spTrChf:2694,spDdMax:-5.8,spiDdMax:-5.6},
+  {d:"2013-07",fg:72,vix:13.5,sp:1686,hys:5.11,pcr:0.62,spi:7399,spTr:2996,spTrChf:2785,spDdMax:-3.5,spiDdMax:-3.7},
+  {d:"2013-08",fg:55,vix:14.8,sp:1633,hys:5.36,pcr:0.68,spi:7354,spTr:2909,spTrChf:2705,spDdMax:-4.7,spiDdMax:-4.3},
+  {d:"2013-09",fg:62,vix:14.3,sp:1682,hys:5.19,pcr:0.65,spi:7611,spTr:3000,spTrChf:2716,spDdMax:-3.6,spiDdMax:-0.9},
+  {d:"2013-10",fg:75,vix:13.0,sp:1756,hys:4.87,pcr:0.6,spi:7829,spTr:3138,spTrChf:2825,spDdMax:-2.4,spiDdMax:0.0},
+  {d:"2013-11",fg:78,vix:12.7,sp:1806,hys:4.52,pcr:0.58,spi:7867,spTr:3234,spTrChf:2930,spDdMax:-2.1,spiDdMax:0.0},
+  {d:"2013-12",fg:82,vix:13.5,sp:1848,hys:4.23,pcr:0.58,spi:7838,spTr:3316,spTrChf:2942,spDdMax:-1.5,spiDdMax:-0.4},
+  {d:"2014-01",fg:48,vix:16.4,sp:1782,hys:4.25,pcr:0.68,spi:7831,spTr:3201,spTrChf:2889,spDdMax:-6.1,spiDdMax:-0.5},
+  {d:"2014-02",fg:65,vix:14.0,sp:1859,hys:4.01,pcr:0.65,spi:8160,spTr:3347,spTrChf:2973,spDdMax:-5.0,spiDdMax:0.0},
+  {d:"2014-03",fg:62,vix:14.1,sp:1872,hys:3.9,pcr:0.62,spi:8202,spTr:3376,spTrChf:2994,spDdMax:-3.9,spiDdMax:0.0},
+  {d:"2014-04",fg:62,vix:13.9,sp:1884,hys:3.96,pcr:0.68,spi:8334,spTr:3400,spTrChf:3003,spDdMax:-4.3,spiDdMax:0.0},
+  {d:"2014-05",fg:68,vix:12.0,sp:1924,hys:3.72,pcr:0.62,spi:8558,spTr:3480,spTrChf:3117,spDdMax:-2.7,spiDdMax:0.0},
+  {d:"2014-06",fg:72,vix:11.6,sp:1960,hys:3.58,pcr:0.6,spi:8456,spTr:3552,spTrChf:3165,spDdMax:-3.0,spiDdMax:-1.2},
+  {d:"2014-07",fg:55,vix:13.5,sp:1931,hys:3.61,pcr:0.65,spi:8330,spTr:3503,spTrChf:3183,spDdMax:-4.3,spiDdMax:-2.7},
+  {d:"2014-08",fg:72,vix:11.7,sp:2003,hys:3.63,pcr:0.62,spi:8566,spTr:3643,spTrChf:3347,spDdMax:-3.0,spiDdMax:0.0},
+  {d:"2014-09",fg:60,vix:14.2,sp:1972,hys:3.77,pcr:0.68,spi:8696,spTr:3592,spTrChf:3416,spDdMax:-4.6,spiDdMax:0.0},
+  {d:"2014-10",fg:32,vix:21.4,sp:2018,hys:4.52,pcr:0.88,spi:8692,spTr:3680,spTrChf:3518,spDdMax:-7.4,spiDdMax:-0.0},
+  {d:"2014-11",fg:68,vix:13.3,sp:2068,hys:4.73,pcr:0.7,spi:8993,spTr:3779,spTrChf:3657,spDdMax:-3.2,spiDdMax:0.0},
+  {d:"2014-12",fg:58,vix:15.8,sp:2059,hys:5.21,pcr:0.72,spi:8857,spTr:3769,spTrChf:3726,spDdMax:-4.9,spiDdMax:-1.5},
+  {d:"2015-01",fg:42,vix:20.0,sp:1995,hys:5.72,pcr:0.7,spi:8263,spTr:3656,spTrChf:3363,spDdMax:-3.8,spiDdMax:-8.1},
+  {d:"2015-02",fg:70,vix:15.3,sp:2105,hys:5.43,pcr:0.65,spi:8922,spTr:3866,spTrChf:3687,spDdMax:-5.9,spiDdMax:-0.8},
+  {d:"2015-03",fg:58,vix:15.1,sp:2068,hys:5.51,pcr:0.68,spi:9137,spTr:3805,spTrChf:3681,spDdMax:-3.1,spiDdMax:0.0},
+  {d:"2015-04",fg:62,vix:13.9,sp:2086,hys:5.14,pcr:0.65,spi:9208,spTr:3842,spTrChf:3613,spDdMax:-2.7,spiDdMax:0.0},
+  {d:"2015-05",fg:65,vix:13.1,sp:2107,hys:5.17,pcr:0.65,spi:9378,spTr:3891,spTrChf:3669,spDdMax:-1.9,spiDdMax:0.0},
+  {d:"2015-06",fg:52,vix:14.6,sp:2063,hys:5.52,pcr:0.72,spi:8919,spTr:3816,spTrChf:3533,spDdMax:-2.4,spiDdMax:-4.9},
+  {d:"2015-07",fg:60,vix:12.6,sp:2104,hys:5.76,pcr:0.75,spi:9559,spTr:3896,spTrChf:3772,spDdMax:-3.0,spiDdMax:0.0},
+  {d:"2015-08",fg:22,vix:24.2,sp:1972,hys:6.35,pcr:0.95,spi:8985,spTr:3661,spTrChf:3519,spDdMax:-11.4,spiDdMax:-6.0},
+  {d:"2015-09",fg:18,vix:24.5,sp:1920,hys:6.92,pcr:0.98,spi:8680,spTr:3570,spTrChf:3466,spDdMax:-11.2,spiDdMax:-9.2},
+  {d:"2015-10",fg:52,vix:17.0,sp:2080,hys:6.43,pcr:0.82,spi:9133,spTr:3871,spTrChf:3827,spDdMax:-10.1,spiDdMax:-4.5},
+  {d:"2015-11",fg:55,vix:16.4,sp:2080,hys:6.89,pcr:0.85,spi:9233,spTr:3883,spTrChf:4000,spDdMax:-4.2,spiDdMax:-3.4},
+  {d:"2015-12",fg:38,vix:18.0,sp:2044,hys:7.29,pcr:0.88,spi:9094,spTr:3822,spTrChf:3776,spDdMax:-5.4,spiDdMax:-4.9},
+  {d:"2016-01",fg:20,vix:22.0,sp:1940,hys:7.67,pcr:0.98,spi:8611,spTr:3632,spTrChf:3721,spDdMax:-14.0,spiDdMax:-9.9},
+  {d:"2016-02",fg:22,vix:21.6,sp:1932,hys:7.99,pcr:1.02,spi:8249,spTr:3627,spTrChf:3615,spDdMax:-14.1,spiDdMax:-13.7},
+  {d:"2016-03",fg:52,vix:16.5,sp:2060,hys:7.17,pcr:0.85,spi:8317,spTr:3873,spTrChf:3737,spDdMax:-8.1,spiDdMax:-13.0},
+  {d:"2016-04",fg:58,vix:14.5,sp:2065,hys:6.46,pcr:0.78,spi:8567,spTr:3888,spTrChf:3731,spDdMax:-3.5,spiDdMax:-10.4},
+  {d:"2016-05",fg:55,vix:14.2,sp:2097,hys:6.25,pcr:0.75,spi:8887,spTr:3958,spTrChf:3924,spDdMax:-3.9,spiDdMax:-7.0},
+  {d:"2016-06",fg:35,vix:19.8,sp:2099,hys:6.4,pcr:0.88,spi:8660,spTr:3968,spTrChf:3886,spDdMax:-5.5,spiDdMax:-9.4},
+  {d:"2016-07",fg:72,vix:13.0,sp:2174,hys:5.8,pcr:0.7,spi:8828,spTr:4115,spTrChf:3989,spDdMax:-4.6,spiDdMax:-7.6},
+  {d:"2016-08",fg:75,vix:11.7,sp:2171,hys:5.44,pcr:0.65,spi:8916,spTr:4120,spTrChf:4050,spDdMax:-1.2,spiDdMax:-6.7},
+  {d:"2016-09",fg:65,vix:13.2,sp:2168,hys:5.17,pcr:0.68,spi:8883,spTr:4121,spTrChf:3981,spDdMax:-2.5,spiDdMax:-7.1},
+  {d:"2016-10",fg:45,vix:16.2,sp:2126,hys:4.81,pcr:0.72,spi:8579,spTr:4046,spTrChf:3995,spDdMax:-2.7,spiDdMax:-10.3},
+  {d:"2016-11",fg:78,vix:14.2,sp:2198,hys:4.45,pcr:0.65,spi:8623,spTr:4196,spTrChf:4245,spDdMax:-5.2,spiDdMax:-9.8},
+  {d:"2016-12",fg:82,vix:11.8,sp:2239,hys:4.15,pcr:0.62,spi:8966,spTr:4279,spTrChf:4364,spDdMax:-2.3,spiDdMax:-6.2},
+  {d:"2017-01",fg:75,vix:11.6,sp:2279,hys:3.89,pcr:0.62,spi:9063,spTr:4360,spTrChf:4336,spDdMax:-1.5,spiDdMax:-5.2},
+  {d:"2017-02",fg:80,vix:11.5,sp:2364,hys:3.74,pcr:0.58,spi:9367,spTr:4533,spTrChf:4576,spDdMax:-3.9,spiDdMax:-2.0},
+  {d:"2017-03",fg:72,vix:11.3,sp:2363,hys:3.67,pcr:0.6,spi:9638,spTr:4538,spTrChf:4540,spDdMax:-1.8,spiDdMax:0.0},
+  {d:"2017-04",fg:70,vix:10.9,sp:2384,hys:3.65,pcr:0.58,spi:9976,spTr:4585,spTrChf:4558,spDdMax:-2.3,spiDdMax:0.0},
+  {d:"2017-05",fg:78,vix:10.4,sp:2412,hys:3.55,pcr:0.56,spi:10249,spTr:4649,spTrChf:4536,spDdMax:-2.4,spiDdMax:0.0},
+  {d:"2017-06",fg:68,vix:11.0,sp:2423,hys:3.64,pcr:0.6,spi:10128,spTr:4678,spTrChf:4469,spDdMax:-0.7,spiDdMax:-1.2},
+  {d:"2017-07",fg:75,vix:10.3,sp:2470,hys:3.56,pcr:0.56,spi:10311,spTr:4775,spTrChf:4628,spDdMax:-2.5,spiDdMax:0.0},
+  {d:"2017-08",fg:62,vix:11.1,sp:2472,hys:3.55,pcr:0.6,spi:10177,spTr:4789,spTrChf:4615,spDdMax:-2.2,spiDdMax:-1.3},
+  {d:"2017-09",fg:68,vix:10.2,sp:2519,hys:3.45,pcr:0.58,spi:10447,spTr:4888,spTrChf:4764,spDdMax:-2.9,spiDdMax:0.0},
+  {d:"2017-10",fg:78,vix:10.2,sp:2575,hys:3.38,pcr:0.55,spi:10604,spTr:5002,spTrChf:4975,spDdMax:-2.0,spiDdMax:0.0},
+  {d:"2017-11",fg:80,vix:11.3,sp:2648,hys:3.38,pcr:0.56,spi:10675,spTr:5155,spTrChf:5075,spDdMax:-2.4,spiDdMax:0.0},
+  {d:"2017-12",fg:75,vix:11.0,sp:2674,hys:3.47,pcr:0.58,spi:10752,spTr:5213,spTrChf:5078,spDdMax:-2.8,spiDdMax:0.0},
+  {d:"2018-01",fg:73,vix:11.0,sp:2824,hys:3.27,pcr:0.55,spi:10737,spTr:5511,spTrChf:5151,spDdMax:-5.0,spiDdMax:-0.1},
+  {d:"2018-02",fg:8,vix:33.5,sp:2714,hys:3.49,pcr:0.78,spi:10259,spTr:5308,spTrChf:4986,spDdMax:-10.3,spiDdMax:-4.6},
+  {d:"2018-03",fg:14,vix:24.9,sp:2641,hys:3.59,pcr:0.75,spi:10190,spTr:5173,spTrChf:4935,spDdMax:-8.4,spiDdMax:-5.2},
+  {d:"2018-04",fg:35,vix:15.9,sp:2648,hys:3.52,pcr:0.72,spi:10525,spTr:5193,spTrChf:5131,spDdMax:-9.6,spiDdMax:-2.1},
+  {d:"2018-05",fg:45,vix:13.4,sp:2705,hys:3.39,pcr:0.68,spi:10165,spTr:5318,spTrChf:5257,spDdMax:-8.1,spiDdMax:-5.5},
+  {d:"2018-06",fg:50,vix:12.4,sp:2718,hys:3.42,pcr:0.68,spi:10327,spTr:5351,spTrChf:5297,spDdMax:-4.7,spiDdMax:-4.0},
+  {d:"2018-07",fg:58,vix:12.8,sp:2816,hys:3.34,pcr:0.62,spi:10898,spTr:5550,spTrChf:5484,spDdMax:-4.4,spiDdMax:0.0},
+  {d:"2018-08",fg:55,vix:12.8,sp:2901,hys:3.22,pcr:0.6,spi:10740,spTr:5731,spTrChf:5551,spDdMax:-3.6,spiDdMax:-1.4},
+  {d:"2018-09",fg:60,vix:12.1,sp:2914,hys:3.25,pcr:0.62,spi:10808,spTr:5763,spTrChf:5658,spDdMax:-1.7,spiDdMax:-0.8},
+  {d:"2018-10",fg:12,vix:24.8,sp:2712,hys:3.67,pcr:0.85,spi:10636,spTr:5369,spTrChf:5396,spDdMax:-10.7,spiDdMax:-2.4},
+  {d:"2018-11",fg:18,vix:20.8,sp:2760,hys:4.17,pcr:0.8,spi:10541,spTr:5479,spTrChf:5457,spDdMax:-9.7,spiDdMax:-3.3},
+  {d:"2018-12",fg:3,vix:36.1,sp:2507,hys:5.02,pcr:0.98,spi:9830,spTr:4984,spTrChf:4902,spDdMax:-19.5,spiDdMax:-9.8},
+  {d:"2019-01",fg:45,vix:17.8,sp:2704,hys:4.86,pcr:0.88,spi:10514,spTr:5384,spTrChf:5349,spDdMax:-16.1,spiDdMax:-3.5},
+  {d:"2019-02",fg:60,vix:14.8,sp:2784,hys:4.58,pcr:0.72,spi:10964,spTr:5556,spTrChf:5559,spDdMax:-8.0,spiDdMax:0.0},
+  {d:"2019-03",fg:48,vix:16.5,sp:2834,hys:4.16,pcr:0.68,spi:11241,spTr:5664,spTrChf:5633,spDdMax:-6.6,spiDdMax:0.0},
+  {d:"2019-04",fg:68,vix:13.1,sp:2946,hys:3.88,pcr:0.62,spi:11735,spTr:5894,spTrChf:6008,spDdMax:-3.3,spiDdMax:0.0},
+  {d:"2019-05",fg:25,vix:18.7,sp:2752,hys:4.25,pcr:0.78,spi:11545,spTr:5519,spTrChf:5557,spDdMax:-6.6,spiDdMax:-1.6},
+  {d:"2019-06",fg:70,vix:13.3,sp:2942,hys:3.99,pcr:0.7,spi:11977,spTr:5908,spTrChf:5768,spDdMax:-7.4,spiDdMax:0.0},
+  {d:"2019-07",fg:62,vix:16.1,sp:2980,hys:3.71,pcr:0.65,spi:12064,spTr:5993,spTrChf:5931,spDdMax:-0.9,spiDdMax:0.0},
+  {d:"2019-08",fg:22,vix:24.6,sp:2878,hys:3.78,pcr:0.75,spi:12061,spTr:5898,spTrChf:5838,spDdMax:-5.3,spiDdMax:-0.0},
+  {d:"2019-09",fg:65,vix:15.3,sp:2976,hys:3.68,pcr:0.68,spi:12233,spTr:6009,spTrChf:5954,spDdMax:-3.0,spiDdMax:0.0},
+  {d:"2019-10",fg:72,vix:13.2,sp:3038,hys:3.56,pcr:0.65,spi:12337,spTr:6139,spTrChf:6072,spDdMax:-6.0,spiDdMax:0.0},
+  {d:"2019-11",fg:85,vix:12.0,sp:3141,hys:3.4,pcr:0.6,spi:12676,spTr:6362,spTrChf:6362,spDdMax:-2.9,spiDdMax:0.0},
+  {d:"2019-12",fg:93,vix:12.5,sp:3231,hys:3.29,pcr:0.58,spi:12838,spTr:6554,spTrChf:6348,spDdMax:-5.0,spiDdMax:0.0},
+  {d:"2020-01",fg:60,vix:18.8,sp:3225,hys:3.24,pcr:0.6,spi:12871,spTr:6551,spTrChf:6351,spDdMax:-0.5,spiDdMax:0.0},
+  {d:"2020-02",fg:25,vix:40.1,sp:2954,hys:4.52,pcr:0.85,spi:11898,spTr:6012,spTrChf:5800,spDdMax:-11.6,spiDdMax:-7.6},
+  {d:"2020-03",fg:2,vix:82.7,sp:2585,hys:10.74,pcr:1.15,spi:11320,spTr:5269,spTrChf:5058,spDdMax:-32.2,spiDdMax:-12.1},
+  {d:"2020-04",fg:38,vix:34.2,sp:2912,hys:8.51,pcr:0.95,spi:11906,spTr:5945,spTrChf:5790,spDdMax:-24.2,spiDdMax:-7.5},
+  {d:"2020-05",fg:52,vix:27.5,sp:3044,hys:7.18,pcr:0.78,spi:12246,spTr:6228,spTrChf:5989,spDdMax:-14.4,spiDdMax:-4.9},
+  {d:"2020-06",fg:55,vix:30.4,sp:3100,hys:6.29,pcr:0.72,spi:12436,spTr:6352,spTrChf:6041,spDdMax:-8.2,spiDdMax:-3.4},
+  {d:"2020-07",fg:60,vix:24.5,sp:3271,hys:5.64,pcr:0.65,spi:12407,spTr:6710,spTrChf:6096,spDdMax:-5.2,spiDdMax:-3.6},
+  {d:"2020-08",fg:72,vix:22.6,sp:3500,hys:4.97,pcr:0.58,spi:12659,spTr:7192,spTrChf:6499,spDdMax:-6.2,spiDdMax:-1.6},
+  {d:"2020-09",fg:50,vix:26.4,sp:3363,hys:5.03,pcr:0.72,spi:12725,spTr:6919,spTrChf:6361,spDdMax:-8.3,spiDdMax:-1.1},
+  {d:"2020-10",fg:38,vix:27.6,sp:3270,hys:5.09,pcr:0.8,spi:11994,spTr:6735,spTrChf:6180,spDdMax:-8.9,spiDdMax:-6.8},
+  {d:"2020-11",fg:90,vix:20.6,sp:3622,hys:4.54,pcr:0.62,spi:13003,spTr:7472,spTrChf:6756,spDdMax:-9.4,spiDdMax:0.0},
+  {d:"2020-12",fg:84,vix:22.8,sp:3756,hys:4.22,pcr:0.58,spi:13328,spTr:7759,spTrChf:6840,spDdMax:-5.8,spiDdMax:0.0},
+  {d:"2021-01",fg:55,vix:33.1,sp:3714,hys:4.09,pcr:0.58,spi:13193,spTr:7681,spTrChf:6841,spDdMax:-2.5,spiDdMax:-1.0},
+  {d:"2021-02",fg:60,vix:22.8,sp:3811,hys:3.94,pcr:0.6,spi:13134,spTr:7893,spTrChf:7168,spDdMax:-2.2,spiDdMax:-1.5},
+  {d:"2021-03",fg:52,vix:19.4,sp:3973,hys:3.67,pcr:0.58,spi:14015,spTr:8238,spTrChf:7758,spDdMax:-6.3,spiDdMax:0.0},
+  {d:"2021-04",fg:58,vix:17.3,sp:4181,hys:3.43,pcr:0.55,spi:14179,spTr:8678,spTrChf:7888,spDdMax:-4.5,spiDdMax:0.0},
+  {d:"2021-05",fg:42,vix:18.8,sp:4204,hys:3.26,pcr:0.56,spi:14669,spTr:8739,spTrChf:7866,spDdMax:-3.5,spiDdMax:0.0},
+  {d:"2021-06",fg:48,vix:15.6,sp:4298,hys:3.27,pcr:0.55,spi:15347,spTr:8943,spTrChf:8236,spDdMax:-3.1,spiDdMax:0.0},
+  {d:"2021-07",fg:30,vix:22.0,sp:4395,hys:3.27,pcr:0.56,spi:15578,spTr:9155,spTrChf:8286,spDdMax:-3.7,spiDdMax:0.0},
+  {d:"2021-08",fg:40,vix:16.5,sp:4523,hys:3.07,pcr:0.54,spi:15948,spTr:9434,spTrChf:8653,spDdMax:-3.4,spiDdMax:0.0},
+  {d:"2021-09",fg:28,vix:23.1,sp:4308,hys:3.18,pcr:0.62,spi:15045,spTr:8995,spTrChf:8403,spDdMax:-4.8,spiDdMax:-5.7},
+  {d:"2021-10",fg:65,vix:16.3,sp:4605,hys:3.09,pcr:0.55,spi:15613,spTr:9625,spTrChf:8807,spDdMax:-7.1,spiDdMax:-2.1},
+  {d:"2021-11",fg:35,vix:27.2,sp:4567,hys:3.5,pcr:0.65,spi:15533,spTr:9558,spTrChf:8821,spDdMax:-1.0,spiDdMax:-2.6},
+  {d:"2021-12",fg:42,vix:17.2,sp:4766,hys:3.32,pcr:0.6,spi:16445,spTr:9987,spTrChf:9125,spDdMax:-5.7,spiDdMax:0.0},
+  {d:"2022-01",fg:30,vix:24.8,sp:4516,hys:3.33,pcr:0.68,spi:15513,spTr:9470,spTrChf:8818,spDdMax:-11.4,spiDdMax:-8.8},
+  {d:"2022-02",fg:25,vix:30.1,sp:4374,hys:3.52,pcr:0.72,spi:15172,spTr:9186,spTrChf:8512,spDdMax:-13.7,spiDdMax:-10.9},
+  {d:"2022-03",fg:28,vix:28.6,sp:4530,hys:3.81,pcr:0.75,spi:15539,spTr:9527,spTrChf:8793,spDdMax:-12.8,spiDdMax:-15.0},
+  {d:"2022-04",fg:35,vix:33.4,sp:4132,hys:4.04,pcr:0.8,spi:15603,spTr:8697,spTrChf:8477,spDdMax:-13.5,spiDdMax:-7.3},
+  {d:"2022-05",fg:15,vix:29.3,sp:4132,hys:4.5,pcr:0.85,spi:14919,spTr:8713,spTrChf:8349,spDdMax:-20.1,spiDdMax:-12.2},
+  {d:"2022-06",fg:14,vix:34.6,sp:3785,hys:5.57,pcr:0.95,spi:13834,spTr:7993,spTrChf:7627,spDdMax:-23.7,spiDdMax:-18.6},
+  {d:"2022-07",fg:42,vix:22.0,sp:4130,hys:4.99,pcr:0.8,spi:14446,spTr:8730,spTrChf:8309,spDdMax:-21.9,spiDdMax:-16.5},
+  {d:"2022-08",fg:38,vix:25.9,sp:3955,hys:4.66,pcr:0.72,spi:14004,spTr:8374,spTrChf:8155,spDdMax:-17.0,spiDdMax:-15.3},
+  {d:"2022-09",fg:18,vix:32.6,sp:3586,hys:5.43,pcr:0.9,spi:13166,spTr:7603,spTrChf:7412,spDdMax:-24.8,spiDdMax:-21.7},
+  {d:"2022-10",fg:45,vix:25.6,sp:3872,hys:5.13,pcr:0.85,spi:13803,spTr:8219,spTrChf:8189,spDdMax:-26.7,spiDdMax:-21.0},
+  {d:"2022-11",fg:55,vix:21.2,sp:4080,hys:4.84,pcr:0.75,spi:14200,spTr:8678,spTrChf:8281,spDdMax:-22.4,spiDdMax:-17.4},
+  {d:"2022-12",fg:35,vix:21.7,sp:3840,hys:4.68,pcr:0.78,spi:13735,spTr:8178,spTrChf:7560,spDdMax:-21.0,spiDdMax:-17.6},
+  {d:"2023-01",fg:55,vix:19.4,sp:4077,hys:4.63,pcr:0.7,spi:14490,spTr:8692,spTrChf:8043,spDdMax:-20.4,spiDdMax:-15.0},
+  {d:"2023-02",fg:62,vix:20.7,sp:3970,hys:4.8,pcr:0.68,spi:14303,spTr:8480,spTrChf:7934,spDdMax:-17.3,spiDdMax:-13.5},
+  {d:"2023-03",fg:32,vix:26.5,sp:4109,hys:4.84,pcr:0.75,spi:14547,spTr:8791,spTrChf:8030,spDdMax:-20.1,spiDdMax:-17.1},
+  {d:"2023-04",fg:55,vix:15.8,sp:4169,hys:4.57,pcr:0.68,spi:15073,spTr:8928,spTrChf:7983,spDdMax:-15.0,spiDdMax:-12.3},
+  {d:"2023-05",fg:65,vix:17.0,sp:4205,hys:4.69,pcr:0.65,spi:14789,spTr:8967,spTrChf:8122,spDdMax:-15.1,spiDdMax:-10.5},
+  {d:"2023-06",fg:75,vix:13.6,sp:4450,hys:4.29,pcr:0.62,spi:14862,spTr:9560,spTrChf:8595,spDdMax:-12.5,spiDdMax:-11.3},
+  {d:"2023-07",fg:80,vix:13.3,sp:4589,hys:3.94,pcr:0.6,spi:14927,spTr:9867,spTrChf:8582,spDdMax:-8.0,spiDdMax:-13.0},
+  {d:"2023-08",fg:48,vix:17.1,sp:4508,hys:3.9,pcr:0.65,spi:14665,spTr:9710,spTrChf:8526,spDdMax:-9.0,spiDdMax:-13.5},
+  {d:"2023-09",fg:30,vix:17.5,sp:4288,hys:3.89,pcr:0.68,spi:14369,spTr:9247,spTrChf:8463,spDdMax:-11.1,spiDdMax:-13.8},
+  {d:"2023-10",fg:25,vix:21.3,sp:4194,hys:4.36,pcr:0.72,spi:13616,spTr:9052,spTrChf:8166,spDdMax:-13.9,spiDdMax:-18.3},
+  {d:"2023-11",fg:62,vix:13.1,sp:4568,hys:3.99,pcr:0.62,spi:14236,spTr:9879,spTrChf:8627,spDdMax:-11.9,spiDdMax:-16.8},
+  {d:"2023-12",fg:75,vix:12.5,sp:4770,hys:3.57,pcr:0.58,spi:14571,spTr:10328,spTrChf:8683,spDdMax:-4.7,spiDdMax:-13.7},
+  {d:"2024-01",fg:72,vix:13.3,sp:4890,hys:3.55,pcr:0.62,spi:14774,spTr:10501,spTrChf:9051,spDdMax:-3.4,spiDdMax:-12.2},
+  {d:"2024-02",fg:75,vix:13.7,sp:5096,hys:3.36,pcr:0.58,spi:14858,spTr:11062,spTrChf:9720,spDdMax:-4.8,spiDdMax:-12.2},
+  {d:"2024-03",fg:70,vix:13.0,sp:5254,hys:3.18,pcr:0.56,spi:15443,spTr:11418,spTrChf:10298,spDdMax:-3.8,spiDdMax:-9.9},
+  {d:"2024-04",fg:35,vix:19.2,sp:5036,hys:3.23,pcr:0.65,spi:15067,spTr:10952,spTrChf:9975,spDdMax:-5.7,spiDdMax:-10.1},
+  {d:"2024-05",fg:52,vix:12.9,sp:5277,hys:3.12,pcr:0.58,spi:15992,spTr:11495,spTrChf:10383,spDdMax:-5.0,spiDdMax:-9.2},
+  {d:"2024-06",fg:55,vix:12.3,sp:5460,hys:3.2,pcr:0.56,spi:15919,spTr:11907,spTrChf:10752,spDdMax:-4.1,spiDdMax:-3.7},
+  {d:"2024-07",fg:52,vix:18.1,sp:5522,hys:3.16,pcr:0.58,spi:16356,spTr:12052,spTrChf:10630,spDdMax:-2.4,spiDdMax:-3.5},
+  {d:"2024-08",fg:28,vix:38.6,sp:5346,hys:3.37,pcr:0.68,spi:16504,spTr:12344,spTrChf:10487,spDdMax:-9.4,spiDdMax:-7.2},
+  {d:"2024-09",fg:65,vix:16.7,sp:5762,hys:3.26,pcr:0.6,spi:16242,spTr:12608,spTrChf:10597,spDdMax:-6.2,spiDdMax:-4.3},
+  {d:"2024-10",fg:60,vix:20.0,sp:5705,hys:2.93,pcr:0.62,spi:15712,spTr:12494,spTrChf:10824,spDdMax:-1.5,spiDdMax:-5.0},
+  {d:"2024-11",fg:65,vix:14.2,sp:6032,hys:2.7,pcr:0.56,spi:15672,spTr:13227,spTrChf:11650,spDdMax:-5.6,spiDdMax:-7.0},
+  {d:"2024-12",fg:32,vix:17.4,sp:5881,hys:2.76,pcr:0.65,spi:15472,spTr:12912,spTrChf:11662,spDdMax:-3.3,spiDdMax:-8.1},
+  {d:"2025-01",fg:48,vix:16.4,sp:6041,hys:2.72,pcr:0.6,spi:16741,spTr:13271,spTrChf:12069,spDdMax:-4.4,spiDdMax:-6.1},
+  {d:"2025-02",fg:25,vix:19.6,sp:5955,hys:2.71,pcr:0.65,spi:17150,spTr:13098,spTrChf:11787,spDdMax:-3.4,spiDdMax:-1.2},
+  {d:"2025-03",fg:8,vix:29.0,sp:5580,hys:3.17,pcr:0.78,spi:16800,spTr:12360,spTrChf:10888,spDdMax:-9.1,spiDdMax:-3.2},
+  {d:"2025-04",fg:4,vix:52.3,sp:5074,hys:4.03,pcr:0.95,spi:16479,spTr:12276,spTrChf:10108,spDdMax:-20.0,spiDdMax:-15.8},
+  {d:"2025-05",fg:40,vix:22.5,sp:5686,hys:3.35,pcr:0.75,spi:16850,spTr:13049,spTrChf:10729,spDdMax:-7.6,spiDdMax:-4.9},
+  {d:"2025-06",fg:55,vix:16.8,sp:5950,hys:3.13,pcr:0.65,spi:16535,spTr:13713,spTrChf:10947,spDdMax:-5.5,spiDdMax:-5.4},
+  {d:"2025-07",fg:62,vix:15.5,sp:6100,hys:2.89,pcr:0.62,spi:16525,spTr:14020,spTrChf:11401,spDdMax:-2.5,spiDdMax:-4.8},
+  {d:"2025-08",fg:58,vix:16.2,sp:6202,hys:2.9,pcr:0.6,spi:16908,spTr:14305,spTrChf:11639,spDdMax:-3.8,spiDdMax:-5.4},
+  {d:"2025-09",fg:50,vix:17.8,sp:6350,hys:2.79,pcr:0.62,spi:16749,spTr:14827,spTrChf:11820,spDdMax:-4.9,spiDdMax:-5.0},
+  {d:"2025-10",fg:45,vix:19.5,sp:6480,hys:2.92,pcr:0.65,spi:16982,spTr:15174,spTrChf:12163,spDdMax:-4.2,spiDdMax:-2.7},
+  {d:"2025-11",fg:55,vix:16.1,sp:6620,hys:3.08,pcr:0.6,spi:17653,spTr:15211,spTrChf:12208,spDdMax:-4.8,spiDdMax:-2.7},
+  {d:"2025-12",fg:48,vix:17.9,sp:6850,hys:2.89,pcr:0.62,spi:18219,spTr:15220,spTrChf:12050,spDdMax:-1.9,spiDdMax:-0.6},
+  {d:"2026-01",fg:55,vix:16.0,sp:7002,hys:2.74,pcr:0.58,spi:18220,spTr:15441,spTrChf:11927,spDdMax:-2.2,spiDdMax:-3.0},
+  {d:"2026-02",fg:35,vix:19.8,sp:6780,hys:2.92,pcr:0.68,spi:19256,spTr:15324,spTrChf:11849,spDdMax:-2.4,spiDdMax:-0.9},
+  {d:"2026-03",fg:20,vix:25.7,sp:6776,hys:3.13,pcr:0.82,spi:17379,spTr:14505,spTrChf:11439,spDdMax:-6.7,spiDdMax:-9.7}
 ];
 
-let S = { data:[], tr:'all', status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null };
+let S = { data:[], tr:'all', tr2:'all', spiYearHigh:null, pcr10d:null, status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null, spi:null, spiDd:null };
 
 function buildData(live) {
-  const rows = H_DATA.map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp, hys:h.hys||null, pcr:h.pcr||null}));
+  const rows = H_DATA.map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp, hys:h.hys||null, pcr:h.pcr||null, spi:h.spi||null, spTr:h.spTr||null, spTrChf:h.spTrChf||null, spDdMax:h.spDdMax??null, spiDdMax:h.spiDdMax??null}));
   if (live) {
     const last = rows[rows.length-1];
     if (live.fearGreed != null) last.fg = live.fearGreed;
@@ -515,32 +529,51 @@ function buildData(live) {
     if (live.sp500 != null) last.sp = live.sp500;
     if (live.hys != null) last.hys = live.hys;
     if (live.pcr != null) last.pcr = live.pcr;
+    if (live.spi != null) last.spi = live.spi;
+    if (live.spTr != null) last.spTr = live.spTr;
+    if (live.spTrChf != null) last.spTrChf = live.spTrChf;
   }
   let ath = 0;
   return rows.map(d => { if(d.sp>ath) ath=d.sp; return {...d, drawdown:((d.sp-ath)/ath)*100, ath}; });
 }
 
-function fwdRet(data, idx, months) {
+function fwdRet(data, idx, months, field) {
   const f = Math.min(idx+months, data.length-1);
-  return f<=idx || f===idx ? null : ((data[f].sp - data[idx].sp)/data[idx].sp*100).toFixed(1);
+  if(f<=idx || f===idx) return null;
+  const v0=data[idx][field], v1=data[f][field];
+  return (v0&&v1) ? ((v1-v0)/v0*100).toFixed(1) : null;
 }
 function fwdRets(data, idx) {
-  // Monate seit Signal
   const last = data.length - 1;
   const mSince = last - idx;
+  const ret = (months, field) => mSince>=months ? fwdRet(data,idx,months,field) : null;
+  const retNow = (field) => {
+    const v0=data[idx][field], v1=data[last][field];
+    return (idx<last&&v0&&v1) ? ((v1-v0)/v0*100).toFixed(1) : null;
+  };
   return {
-    m12:  mSince >= 12  ? fwdRet(data, idx, 12)  : null,
-    m36:  mSince >= 36  ? fwdRet(data, idx, 36)  : null,
-    m60:  mSince >= 60  ? fwdRet(data, idx, 60)  : null,
-    m120: mSince >= 120 ? fwdRet(data, idx, 120) : null,
-    mNow: idx < last ? ((data[last].sp - data[idx].sp) / data[idx].sp * 100).toFixed(1) : null,
+    // S&P 500 TR CHF
+    m12:   ret(12,  'spTrChf'),
+    m36:   ret(36,  'spTrChf'),
+    m60:   ret(60,  'spTrChf'),
+    m120:  ret(120, 'spTrChf'),
+    mNow:  retNow('spTrChf'),
+    // SPI TR CHF
+    spi12:  ret(12,  'spi'),
+    spi36:  ret(36,  'spi'),
+    spi60:  ret(60,  'spi'),
+    spi120: ret(120, 'spi'),
+    spiNow: retNow('spi'),
     mSince: mSince,
   };
 }
 
 function tActive(d, t) {
   const hysOk = d.hys == null || d.hys > t.hysMin;
-  const pcrOk = d.pcr == null || d.pcr >= t.pcrMin;
+  // PCR: 10-Tage-Ø für live (letzter Datenpunkt), historisch Monatswert
+  const isLive = d === S.data[S.data.length-1];
+  const pcrVal = (isLive && S.pcr10d != null) ? S.pcr10d : d.pcr;
+  const pcrOk = pcrVal == null || pcrVal >= t.pcrMin;
   return d.drawdown < t.spDD && d.vix > t.vixMin && d.fg < t.fgMax && hysOk && pcrOk;
 }
 
@@ -577,16 +610,35 @@ function vis() {
   window.addEventListener('resize', applyResponsive);
   window.addEventListener('load', applyResponsive);
 
+
+function vis2() {
+  if(S.tr2==='all') return S.data;
+  const m = S.tr2==='3y'?36:S.tr2==='5y'?60:S.tr2==='10y'?120:S.tr2==='20y'?240:S.data.length;
+  return S.data.slice(Math.max(0, S.data.length-m));
+}
+
 function render() {
   const data=vis(), full=S.data, cur=full[full.length-1];
   if(!cur) return;
 
+  // SPI Drawdown berechnen (tagesaktuell wenn möglich, sonst aus H_DATA)
+  if(S.spi && S.spiYearHigh && S.spiYearHigh > 0) {
+    // Präziser DD: aktueller SIX-Kurs vs Jahreshoch
+    S.spiDd = Math.round(((S.spi - S.spiYearHigh) / S.spiYearHigh) * 10000) / 100;
+  } else {
+    // Fallback: letzter spiDdMax Wert aus H_DATA (Tagesschlusskurs-Basis)
+    const lastWithDd = [...full].reverse().find(d => d.spiDdMax != null);
+    S.spiDd = lastWithDd ? lastWithDd.spiDdMax : null;
+  }
+
   const W=Math.min(900, window.innerWidth ? window.innerWidth - 32 : 900),HH=420,pL=52,pR=52,pT=28,pB=55,pW=W-pL-pR,pH=HH-pT-pB;
   const xS=i=>pL+(i/(data.length-1))*pW;
-  const mD=Math.min(...data.map(d=>d.drawdown),-22);
+  const mD=Math.min(...data.map(d=>Math.min(d.drawdown,d.spDdMax??0)),-22);
   const yD=v=>pT+((-v/(-mD))*pH);
+  // HYS: 0-20% → invertiert (hoch = oben im Chart)
   const mxH=Math.max(...data.map(d=>d.hys||0),8);
   const yH=v=>v==null?null:pT+pH-(v/mxH*pH*0.8);
+  // PCR: 0-1.5 → invertiert (hoch = oben im Chart)
   const yP=v=>v==null?null:pT+pH-(v/1.5*pH*0.8);
   const yF=v=>pT+((100-v)/100*pH);
   const mV=Math.max(...data.map(d=>d.vix),40);
@@ -594,6 +646,26 @@ function render() {
   const mnSP=Math.min(...data.map(d=>d.sp)), mxSP=Math.max(...data.map(d=>d.sp));
   const ySP=v=>pT+((mxSP-v)/(mxSP-mnSP)*pH);
   const mkP=fn=>data.map((d,i)=>`${i===0?'M':'L'}${xS(i).toFixed(1)},${fn(d).toFixed(1)}`).join(' ');
+  const data2=vis2();
+  // Zweiter Chart: S&P 500 TR CHF vs SPI TR CHF
+  const HH2=340, pH2=HH2-pT-pB;
+  // Drawdown aus ALLEN S.data vorberechnen (nicht aus vis() damit Zeitfilter korrekt)
+  let _spTrChfAth=0;
+  S.data.forEach(d=>{
+    if(d.spTrChf!=null){if(d.spTrChf>_spTrChfAth)_spTrChfAth=d.spTrChf;d.spTrChfDD=((d.spTrChf-_spTrChfAth)/_spTrChfAth)*100;}
+    else d.spTrChfDD=null;
+  });
+  let _spiAth=0;
+  S.data.forEach(d=>{
+    if(d.spi!=null){if(d.spi>_spiAth)_spiAth=d.spi;d.spiDD=((d.spi-_spiAth)/_spiAth)*100;}
+    else d.spiDD=null;
+  });
+  const mD2=Math.min(...data2.filter(d=>d.spDdMax!=null||d.spiDdMax!=null).map(d=>Math.min(d.spDdMax??0,d.spiDdMax??0)),-25);
+  const yD2=v=>pT+((-v/(-mD2))*pH2);
+  const xS2=i=>pL+(i/(data2.length-1||1))*pW;
+  const spBase2=data2.find(d=>d.spTrChf!=null)?.spTrChf||1;
+  const spiBase2=data2.find(d=>d.spi!=null)?.spi||1;
+  const yrs2=[];let ly2=null;data2.forEach((d,i)=>{const y=d.date.slice(0,4);if(y!==ly2){yrs2.push({y,i});ly2=y;}});
   const spArea=mkP(d=>ySP(d.sp))+` L${xS(data.length-1).toFixed(1)},${(pT+pH).toFixed(1)} L${pL},${(pT+pH).toFixed(1)} Z`;
   const yrs=[]; let ly=null;
   data.forEach((d,i)=>{const y=d.date.slice(0,4);if(y!==ly){yrs.push({y,i});ly=y;}});
@@ -615,9 +687,15 @@ function render() {
   const avg60=valid60.length?(valid60.reduce((a,b)=>a+parseFloat(b.m60),0)/valid60.length).toFixed(1):null;
   const avg120=valid120.length?(valid120.reduce((a,b)=>a+parseFloat(b.m120),0)/valid120.length).toFixed(1):null;
   const avgNow=validNow.length?(validNow.reduce((a,b)=>a+parseFloat(b.mNow),0)/validNow.length).toFixed(1):null;
+  // SPI Durchschnitte
+  const vspi12=hs.filter(s=>s.spi12!==null); const aspi12=vspi12.length?(vspi12.reduce((a,b)=>a+parseFloat(b.spi12),0)/vspi12.length).toFixed(1):null;
+  const vspi36=hs.filter(s=>s.spi36!==null); const aspi36=vspi36.length?(vspi36.reduce((a,b)=>a+parseFloat(b.spi36),0)/vspi36.length).toFixed(1):null;
+  const vspi60=hs.filter(s=>s.spi60!==null); const aspi60=vspi60.length?(vspi60.reduce((a,b)=>a+parseFloat(b.spi60),0)/vspi60.length).toFixed(1):null;
+  const vspi120=hs.filter(s=>s.spi120!==null); const aspi120=vspi120.length?(vspi120.reduce((a,b)=>a+parseFloat(b.spi120),0)/vspi120.length).toFixed(1):null;
+  const vspiNow=hs.filter(s=>s.spiNow!==null); const aspiNow=vspiNow.length?(vspiNow.reduce((a,b)=>a+parseFloat(b.spiNow),0)/vspiNow.length).toFixed(1):null;
 
   const tranchenHTML=TRANCHEN.map(t=>{
-    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=S.pcr==null||S.pcr>=t.pcrMin;
+    const c1=cur.drawdown<t.spDD, c2=cur.vix>t.vixMin, c3=cur.fg<t.fgMax, c4=S.hys==null||S.hys>t.hysMin, c5=(S.pcr10d!=null?S.pcr10d:S.pcr)==null||(S.pcr10d!=null?S.pcr10d:S.pcr)>=t.pcrMin;
     const active=c1&&c2&&c3&&c4&&c5;
     return `<div class="tranche ${t.cls}${active?' active':''}">
       ${active?`<div class="now-badge">JETZT KAUFEN</div>`:''}
@@ -629,7 +707,7 @@ function render() {
         <div class="cond ${c2?'met':'unmet'}"><div class="cond-dot"></div>VIX > ${t.vixMin} — aktuell ${cur.vix.toFixed(1)}</div>
         <div class="cond ${c3?'met':'unmet'}"><div class="cond-dot"></div>Fear &amp; Greed < ${t.fgMax} — aktuell ${cur.fg}</div>
         <div class="cond ${c4?'met':'unmet'}"><div class="cond-dot"></div>High-Yield Spread > ${t.hysMin}% — ${S.hys!=null?'aktuell '+S.hys.toFixed(2)+'%':'wird geladen…'}</div>
-        <div class="cond ${c5?'met':'unmet'}"><div class="cond-dot"></div>Put/Call Ratio > ${t.pcrMin} — ${S.pcr!=null?'aktuell '+S.pcr.toFixed(2):'wird geladen…'}</div>
+        <div class="cond ${c5?'met':'unmet'}"><div class="cond-dot"></div>Put/Call Ratio (Ø 10 Tage) > ${t.pcrMin} — ${S.pcr10d!=null?'Ø10T: '+S.pcr10d.toFixed(2):' wird geladen…'}</div>
       </div>
     </div>`;
   }).join('');
@@ -662,13 +740,41 @@ function render() {
         {l:'VIX',fmt:cur.vix.toFixed(2),t:'> 25 / 30 / 40',m:cur.vix>25,c:'var(--red)'},
         {l:'S&P 500 Drawdown',fmt:cur.drawdown.toFixed(2)+'%',t:'> 10% / 15% / 20%',m:cur.drawdown<-10,c:'var(--blue)'},
         {l:'High-Yield Spread',fmt:S.hys!=null?S.hys.toFixed(2)+'%':'–',t:'> 4 / 5 / 7%',m:S.hys!=null&&S.hys>4.0,c:'var(--orange)'},
-        {l:'Put/Call Ratio (Tageswert)',fmt:S.pcr!=null?S.pcr.toFixed(2):'–',t:'> 0.90 / 1.00 / 1.10',m:S.pcr!=null&&S.pcr>=0.90,c:'var(--purple)'}
+        {l:'Put/Call Ratio (Ø 10 Tage)',fmt:S.pcr10d!=null?S.pcr10d.toFixed(2):'–',t:'Ø > 0.90 / 1.00 / 1.10',m:S.pcr10d!=null&&S.pcr10d>=0.90,c:'var(--purple)'}
       ].map(c=>`<div class="sc ${c.m?'m':''}">
         <div class="lb">${c.l}</div>
         <div class="vl" style="color:${c.c}">${c.fmt}</div>
         <div class="th">Schwelle: ${c.t}</div>
         <div class="ck ${c.m?'y':'n'}">${c.m?'✓ Signal aktiv':'– Kein Signal'}</div>
       </div>`).join('')}
+    </div>
+
+    <div class="smi-box">
+      <div class="smi-title">🇨🇭 SPI Total Return (SNB-Daten) — Zusatzinfo</div>
+      <div class="smi-grid">
+        <div class="smi-card">
+          <div class="lb">Aktueller Stand</div>
+          <div class="vl" style="color:var(--fg)">${S.spi!=null?S.spi.toLocaleString('de-CH'):'–'}</div>
+          <div class="th">Punkte (SPI Total Return, von SIX)</div>
+        </div>
+        <div class="smi-card ${S.spiDd!=null&&S.spiDd<-10?'smi-signal':''}">
+          <div class="lb">Drawdown vom letzten Hoch (ATH)</div>
+          <div class="vl" style="color:${S.spiDd!=null?(S.spiDd<-20?'var(--red)':S.spiDd<-15?'var(--amber)':S.spiDd<-10?'var(--green)':S.spiDd<-5?'rgba(34,197,94,.7)':'var(--muted)'):'var(--muted)'}">
+            ${S.spiDd!=null?S.spiDd.toFixed(1)+'%':'–'}
+          </div>
+          <div class="th">T1 &gt;10% · T2 &gt;15% · T3 &gt;20%</div>
+          <div class="ck ${S.spiDd!=null&&S.spiDd<-10?'y':'n'}">
+            ${S.spiDd!=null?(S.spiDd<-20?'🔴 T3 aktiv':S.spiDd<-15?'🟡 T2 aktiv':S.spiDd<-10?'🟢 T1 aktiv':S.spiDd<-5?'⚠️ '+S.spiDd.toFixed(1)+'% — nähert sich T1':'– Kein Signal'):'Lade…'}
+          </div>
+        </div>
+        <div class="smi-card">
+          <div class="lb">Signal-Status</div>
+          <div class="vl" style="font-size:15px;color:${S.spiDd!=null?(S.spiDd<-20?'var(--red)':S.spiDd<-15?'var(--amber)':S.spiDd<-10?'var(--green)':S.spiDd<-5?'rgba(34,197,94,.7)':'var(--muted)'):'var(--muted)'}">
+            ${S.spiDd!=null?(S.spiDd<-20?'🔴 T3 – Kaufen ('+S.spiDd.toFixed(1)+'%)':S.spiDd<-15?'🟡 T2 – Aufstocken ('+S.spiDd.toFixed(1)+'%)':S.spiDd<-10?'🟢 T1 – Einstieg ('+S.spiDd.toFixed(1)+'%)':S.spiDd<-5?'🟡 '+S.spiDd.toFixed(1)+'% — nähert sich T1':'⚪ Abwarten ('+S.spiDd.toFixed(1)+'%)'):'Lade…'}
+          </div>
+          <div class="th">Nur Zusatzinfo, kein Hauptsignal</div>
+        </div>
+      </div>
     </div>
 
     <div class="info-box">
@@ -698,8 +804,8 @@ function render() {
         </div>
         <div class="info-card">
           <div class="info-card-title" style="color:var(--purple)">Put/Call Ratio</div>
-          <div class="info-card-text">Verhältnis von Put- zu Call-Optionen an der CBOE (aktueller Tageswert). Puts sind Absicherungen gegen fallende Kurse. Ein hoher Wert (&gt;0.85) zeigt, dass viele Marktteilnehmer auf Kursrückgang setzen – ein klassisches Kontra-Signal für antizyklische Käufer.</div>
-          <div class="info-card-signal" style="background:rgba(167,139,250,.15);color:var(--purple)">Signal: &gt; 0.90 / 1.00 / 1.10</div>
+          <div class="info-card-text">Verhältnis von Put- zu Call-Optionen an der CBOE. Puts sind Absicherungen gegen fallende Kurse. Das Signal basiert auf dem <b>10-Tage-Durchschnitt</b> – dieser glättet tägliche Schwankungen und zeigt die echte Marktstimmung. Ein hoher Wert (&gt;0.90) zeigt, dass viele Marktteilnehmer auf Kursrückgang setzen – ein klassisches Kontra-Signal für antizyklische Käufer.</div>
+          <div class="info-card-signal" style="background:rgba(167,139,250,.15);color:var(--purple)">Signal (10-Tage-Ø): &gt; 0.90 / 1.00 / 1.10</div>
         </div>
       </div>
     </div>
@@ -714,6 +820,7 @@ function render() {
       ${bs2.filter(s=>!tActive(s,TRANCHEN[2])).map(s=>`<rect x="${(xS(s.i)-pW/data.length/2).toFixed(1)}" y="${pT}" width="${Math.max(pW/data.length,6).toFixed(1)}" height="${pH}" fill="var(--amber)" opacity=".13" rx="2"/>`).join('')}
       ${bs1.filter(s=>!tActive(s,TRANCHEN[1])).map(s=>`<rect x="${(xS(s.i)-pW/data.length/2).toFixed(1)}" y="${pT}" width="${Math.max(pW/data.length,6).toFixed(1)}" height="${pH}" fill="var(--green)" opacity=".10" rx="2"/>`).join('')}
       <path d="${spArea}" fill="rgba(148,163,184,.05)" stroke="none"/>
+      ${(()=>{const smiPts=data.filter(d=>d.spi!=null);if(smiPts.length<2)return '';const mnS=Math.min(...smiPts.map(d=>d.spi)),mxS=Math.max(...smiPts.map(d=>d.spi));const yS=v=>pT+pH-((v-mnS)/(mxS-mnS)*pH*0.85);const path=smiPts.reduce((s,d)=>{const x=xS(data.indexOf(d)),y=yS(d.spi).toFixed(1);return s+(s===''?`M${x.toFixed(1)},${y}`:`L${x.toFixed(1)},${y}`)},'');return `<path d="${path}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.2" stroke-dasharray="3,2"/>`;})()} 
       <path d="${mkP(d=>ySP(d.sp))}" fill="none" stroke="rgba(148,163,184,.38)" stroke-width="1.5" stroke-dasharray="4,2"/>
       <line x1="${pL}" x2="${W-pR}" y1="${yH(4).toFixed(1)}" y2="${yH(4).toFixed(1)}" stroke="var(--orange)" stroke-dasharray="2,3" opacity=".35"/>
       <text x="${W-pR+5}" y="${(yH(4)+3).toFixed(1)}" fill="var(--orange)" font-size="8" opacity=".6">4%</text>
@@ -729,32 +836,78 @@ function render() {
       <path d="${data.filter(d=>d.pcr!=null).reduce((s,d,i,a)=>{const x=xS(data.indexOf(d)),y=yP(d.pcr);return s+(s===''?`M${x.toFixed(1)},${y.toFixed(1)}`:`L${x.toFixed(1)},${y.toFixed(1)}`)},'')}" fill="none" stroke="var(--purple)" stroke-width="1.5" opacity=".7"/>
       <path d="${mkP(d=>yV(d.vix))}" fill="none" stroke="var(--red)" stroke-width="1.5" opacity=".65"/>
       <path d="${mkP(d=>yF(d.fg))}" fill="none" stroke="var(--amber)" stroke-width="1.5" opacity=".65"/>
-      <path d="${mkP(d=>yD(d.drawdown))}" fill="none" stroke="var(--blue)" stroke-width="2.5" opacity=".9"/>
+      <path d="${mkP(d=>yD(d.drawdown))}" fill="none" stroke="var(--blue)" stroke-width="1" opacity=".35" stroke-dasharray="2,2"/>
+      <path d="${data.filter(d=>d.spDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS(data.indexOf(d)).toFixed(1)+','+yD(d.spDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.5" opacity=".9"/>
       ${bs1.map(s=>`<circle cx="${xS(s.i).toFixed(1)}" cy="${yD(s.drawdown).toFixed(1)}" r="${tActive(s,TRANCHEN[2])?7:tActive(s,TRANCHEN[1])?6:4}" fill="${tActive(s,TRANCHEN[2])?'var(--red)':tActive(s,TRANCHEN[1])?'var(--amber)':'var(--green)'}" stroke="#0a0e17" stroke-width="1.5"/>`).join('')}
       ${yrs.map(yl=>`<text x="${xS(yl.i).toFixed(1)}" y="${HH-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
       ${[0,-5,-10,-15,-20].filter(v=>v>=mD-2).map(v=>`<text x="${W-pR+5}" y="${(yD(v)+3).toFixed(1)}" fill="rgba(96,165,250,.5)" font-size="8">${v}%</text>`).join('')}
       <g transform="translate(${pL+8},${pT+8})">
-        <rect x="-4" y="-8" width="210" height="94" fill="rgba(10,14,23,.9)" rx="4"/>
-        <circle cx="4" cy="0" r="4" fill="var(--blue)"/><text x="13" y="4" fill="var(--blue)" font-size="10">S&amp;P 500 Drawdown</text>
+        <rect x="-4" y="-8" width="210" height="110" fill="rgba(10,14,23,.9)" rx="4"/>
+        <circle cx="4" cy="0" r="4" fill="var(--blue)"/><text x="13" y="4" fill="var(--blue)" font-size="10">S&amp;P 500 DD (TR)</text>
         <circle cx="4" cy="16" r="4" fill="var(--amber)"/><text x="13" y="20" fill="var(--amber)" font-size="10">Fear &amp; Greed Index</text>
         <circle cx="4" cy="32" r="4" fill="var(--red)"/><text x="13" y="36" fill="var(--red)" font-size="10">VIX</text>
         <line x1="0" x2="8" y1="48" y2="48" stroke="rgba(148,163,184,.45)" stroke-width="1.5" stroke-dasharray="3,2"/>
         <text x="13" y="52" fill="rgba(148,163,184,.45)" font-size="10">S&amp;P 500 Kurs</text>
         <circle cx="4" cy="64" r="4" fill="var(--orange)"/><text x="13" y="68" fill="var(--orange)" font-size="10">High-Yield Spread</text>
         <circle cx="4" cy="80" r="4" fill="var(--purple)"/><text x="13" y="84" fill="var(--purple)" font-size="10">Put/Call Ratio</text>
+        <line x1="0" x2="8" y1="96" y2="96" stroke="rgba(255,255,255,.35)" stroke-width="1.2" stroke-dasharray="3,2"/><text x="13" y="100" fill="rgba(255,255,255,.35)" font-size="10">SPI Total Return</text>
       </g>
     </svg></div>
 
     <div class="tb" id="tt"></div>
 
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em">🌍 S&amp;P 500 TR vs. SPI TR — in CHF <span style="font-weight:400;font-size:11px;color:var(--muted)">(beide TR · S&amp;P 500 monatlich in CHF konvertiert)</span></div>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        ${['3y','5y','10y','20y','all'].map(t=>`<button class="btn${S.tr2===t?' ac':''}" onclick="S.tr2='${t}';render()" style="font-size:11px;padding:3px 9px">${t==='3y'?'3J':t==='5y'?'5J':t==='10y'?'10J':t==='20y'?'20J':'Alle'}</button>`).join('')}
+      </div>
+    </div>
+    <div class="cw"><svg id="ch2" viewBox="0 0 ${W} ${HH2}">
+      ${[0,.25,.5,.75,1].map(f=>`<line x1="${pL}" x2="${W-pR}" y1="${(pT+f*pH2).toFixed(1)}" y2="${(pT+f*pH2).toFixed(1)}" stroke="rgba(148,163,184,.07)"/>`).join('')}
+      <line x1="${pL}" x2="${W-pR}" y1="${yD2(-10).toFixed(1)}" y2="${yD2(-10).toFixed(1)}" stroke="var(--amber)" stroke-dasharray="3,3" opacity=".4"/>
+      <text x="${pL-3}" y="${(yD2(-10)+3).toFixed(1)}" fill="var(--amber)" font-size="8" text-anchor="end">−10%</text>
+      <line x1="${pL}" x2="${W-pR}" y1="${yD2(-20).toFixed(1)}" y2="${yD2(-20).toFixed(1)}" stroke="var(--red)" stroke-dasharray="3,3" opacity=".4"/>
+      <text x="${pL-3}" y="${(yD2(-20)+3).toFixed(1)}" fill="var(--red)" font-size="8" text-anchor="end">−20%</text>
+      <line x1="${pL}" x2="${W-pR}" y1="${yD2(-30).toFixed(1)}" y2="${yD2(-30).toFixed(1)}" stroke="rgba(239,68,68,.25)" stroke-dasharray="3,3" opacity=".4"/>
+      <text x="${pL-3}" y="${(yD2(-30)+3).toFixed(1)}" fill="rgba(239,68,68,.35)" font-size="8" text-anchor="end">−30%</text>
+      <path d="${data2.filter(d=>d.spTrChf!=null).map((d,i)=>{const vals=data2.filter(x=>x.spTrChf!=null).map(x=>x.spTrChf/spBase2*100);const mn=Math.min(...vals),mx=Math.max(...vals);const yF=v=>pT+(mx-v)/(mx-mn)*pH2*0.75+pH2*0.12;return (i===0?'M':'L')+xS2(data2.filter(x=>x.spTrChf!=null).indexOf(d)).toFixed(1)+','+yF(d.spTrChf/spBase2*100).toFixed(1);}).join(' ')}" fill="none" stroke="rgba(96,165,250,.45)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <path d="${data2.filter(d=>d.spi!=null).map((d,i)=>{const vals=data2.filter(x=>x.spi!=null).map(x=>x.spi/spiBase2*100);const mn=Math.min(...vals),mx=Math.max(...vals);const yF=v=>pT+(mx-v)/(mx-mn)*pH2*0.75+pH2*0.12;return (i===0?'M':'L')+xS2(data2.filter(x=>x.spi!=null).indexOf(d)).toFixed(1)+','+yF(d.spi/spiBase2*100).toFixed(1);}).join(' ')}" fill="none" stroke="rgba(34,197,94,.45)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <path d="${data2.filter(d=>d.spDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS2(data2.indexOf(d)).toFixed(1)+','+yD2(d.spDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.5" opacity=".9"/>
+      <path d="${data2.filter(d=>d.spiDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS2(data2.indexOf(d)).toFixed(1)+','+yD2(d.spiDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--green)" stroke-width="2.5" opacity=".9"/>
+      ${yrs2.map(yl=>`<text x="${xS2(yl.i).toFixed(1)}" y="${HH2-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
+      ${[0,-10,-20,-30,-40,-50].filter(v=>v>=mD2-5).map(v=>`<text x="${W-pR+5}" y="${(yD2(v)+3).toFixed(1)}" fill="rgba(148,163,184,.4)" font-size="8">${v}%</text>`).join('')}
+      <g transform="translate(${pL+8},${pT+8})">
+        <rect x="-4" y="-8" width="255" height="102" fill="rgba(10,14,23,.92)" rx="4"/>
+        <circle cx="4" cy="0" r="5" fill="var(--blue)"/><text x="15" y="4" fill="var(--blue)" font-size="10" font-weight="600">S&amp;P 500 TR Drawdown (CHF)</text>
+        <line x1="0" x2="10" y1="16" y2="16" stroke="rgba(96,165,250,.6)" stroke-width="2" stroke-dasharray="4,2"/><text x="15" y="20" fill="rgba(96,165,250,.6)" font-size="10">S&amp;P 500 TR Kurs normiert (CHF)</text>
+        <circle cx="4" cy="32" r="5" fill="var(--green)"/><text x="15" y="36" fill="var(--green)" font-size="10" font-weight="600">SPI TR Drawdown (CHF)</text>
+        <line x1="0" x2="10" y1="48" y2="48" stroke="rgba(34,197,94,.6)" stroke-width="2" stroke-dasharray="4,2"/><text x="15" y="52" fill="rgba(34,197,94,.6)" font-size="10">SPI TR Kurs normiert (CHF)</text>
+        <text x="0" y="68" fill="rgba(148,163,184,.6)" font-size="9">Kurse normiert auf Basis 100 · beide Total Return</text>
+        <text x="0" y="80" fill="rgba(148,163,184,.4)" font-size="9">2000–2026: S&amp;P TR CHF +275% vs SPI TR +268%</text>
+        <text x="0" y="92" fill="rgba(245,158,11,.35)" font-size="8">⚠ Historik auf Monatsbasis — Intramonats-DD unterschätzt</text>
+      </g>
+    </svg></div>
+
+
     <div class="sb">
       <div class="sh">
-        <div class="st">Historische Kaufsignale (Tranche 1: DD ≥ 5% + VIX > 30 + F&amp;G < 25)</div>
-        ${avg12?`<div class="ab">Ø +${avg12}% (1J)</div>`:''}
-        ${avg36?`<div class="ab" style="background:rgba(167,139,250,.12);color:var(--purple)">Ø +${avg36}% (3J)</div>`:''}
-        ${avg60?`<div class="ab" style="background:rgba(251,146,60,.12);color:var(--orange)">Ø +${avg60}% (5J)</div>`:''}
-        ${avg120?`<div class="ab" style="background:rgba(96,165,250,.12);color:var(--blue)">Ø +${avg120}% (10J)</div>`:''}
-        ${avgNow?`<div class="ab" style="background:rgba(100,220,130,.12);color:var(--green)">Ø +${avgNow}% (bis heute)</div>`:''} 
+        <div class="st">Historische Kaufsignale (Tranche 1) · Renditen S&amp;P 500 TR CHF &amp; SPI TR CHF</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%">
+          <span style="font-size:10px;color:var(--muted);font-weight:600">S&amp;P 500 TR CHF:</span>
+          ${avg12?`<div class="ab">Ø +${avg12}% (1J)</div>`:''}
+          ${avg36?`<div class="ab" style="background:rgba(167,139,250,.12);color:var(--purple)">Ø +${avg36}% (3J)</div>`:''}
+          ${avg60?`<div class="ab" style="background:rgba(251,146,60,.12);color:var(--orange)">Ø +${avg60}% (5J)</div>`:''}
+          ${avg120?`<div class="ab" style="background:rgba(96,165,250,.12);color:var(--blue)">Ø +${avg120}% (10J)</div>`:''}
+          ${avgNow?`<div class="ab" style="background:rgba(100,220,130,.12);color:var(--green)">Ø +${avgNow}% (heute)</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%;margin-top:4px">
+          <span style="font-size:10px;color:var(--muted);font-weight:600">SPI TR CHF:</span>
+          ${aspi12?`<div class="ab" style="background:rgba(34,197,94,.12);color:var(--green)">Ø +${aspi12}% (1J)</div>`:''}
+          ${aspi36?`<div class="ab" style="background:rgba(34,197,94,.1);color:var(--green)">Ø +${aspi36}% (3J)</div>`:''}
+          ${aspi60?`<div class="ab" style="background:rgba(34,197,94,.08);color:var(--green)">Ø +${aspi60}% (5J)</div>`:''}
+          ${aspi120?`<div class="ab" style="background:rgba(34,197,94,.07);color:var(--green)">Ø +${aspi120}% (10J)</div>`:''}
+          ${aspiNow?`<div class="ab" style="background:rgba(34,197,94,.1);color:var(--green)">Ø +${aspiNow}% (heute)</div>`:''}
+        </div>
       </div>
       ${hs.length===0
         ?'<div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Keine Signale im gewählten Zeitraum.</div>'
@@ -770,13 +923,24 @@ function render() {
           const mLabel = s.mSince < 12 ? s.mSince+'M' : s.mSince < 24 ? (s.mSince/12).toFixed(1)+'J' : Math.round(s.mSince/12)+'J';
           return `<div class="sg">
             <div class="sd">${s.date}</div>
-            <div class="si">F&amp;G: <b style="color:var(--amber)">${s.fg}</b> · VIX: <b style="color:var(--red)">${s.vix.toFixed(1)}</b> · DD: <b style="color:var(--blue)">${s.drawdown.toFixed(1)}%</b>${s.hys!=null?' · HYS: <b style="color:var(--orange)">'+s.hys+'%</b>':''}${s.pcr!=null?' · PCR: <b style="color:var(--purple)">'+s.pcr+'</b>':''}${tag}</div>
-            <div class="sret" style="display:flex;gap:6px;flex-wrap:wrap">
-              ${s.m12!==null?`<span style="color:${col(s.m12)}">${fmt(s.m12,' (1J)')}</span>`:''}
-              ${s.m36!==null?`<span style="color:${col(s.m36)}">${fmt(s.m36,' (3J)')}</span>`:''}
-              ${s.m60!==null?`<span style="color:${col(s.m60)}">${fmt(s.m60,' (5J)')}</span>`:''}
-              ${s.m120!==null?`<span style="color:${col(s.m120)}">${fmt(s.m120,' (10J)')}</span>`:''}
-              ${s.mNow!==null?`<span style="color:${col(s.mNow)};background:rgba(100,220,130,.08);padding:1px 5px;border-radius:3px">${fmt(s.mNow,' ('+mLabel+' → heute)')}</span>`:''}
+            <div class="si">F&amp;G: <b style="color:var(--amber)">${s.fg}</b> · VIX: <b style="color:var(--red)">${s.vix.toFixed(1)}</b> · DD: <b style="color:var(--blue)">${s.drawdown.toFixed(1)}%</b>${s.hys!=null?' · HYS: <b style="color:var(--orange)">'+s.hys+'%</b>':''}${s.pcr!=null?' · PCR: <b style="color:var(--purple)">'+s.pcr+'</b>':''}${s.spi!=null?' · SPI: <b style="color:rgba(255,255,255,.5)">'+s.spi.toLocaleString('de-CH')+'</b>':''}${tag}</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div class="sret" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:9px;color:var(--muted);min-width:70px">S&amp;P TR CHF:</span>
+                ${s.m12!==null?`<span style="color:${col(s.m12)};font-size:11px">${fmt(s.m12,' 1J')}</span>`:''}
+                ${s.m36!==null?`<span style="color:${col(s.m36)};font-size:11px">${fmt(s.m36,' 3J')}</span>`:''}
+                ${s.m60!==null?`<span style="color:${col(s.m60)};font-size:11px">${fmt(s.m60,' 5J')}</span>`:''}
+                ${s.m120!==null?`<span style="color:${col(s.m120)};font-size:11px">${fmt(s.m120,' 10J')}</span>`:''}
+                ${s.mNow!==null?`<span style="color:${col(s.mNow)};font-size:11px;background:rgba(100,220,130,.08);padding:1px 4px;border-radius:3px">${fmt(s.mNow,' '+mLabel)}</span>`:''}
+              </div>
+              <div class="sret" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:9px;color:var(--muted);min-width:70px">SPI TR CHF:</span>
+                ${s.spi12!==null?`<span style="color:${col(s.spi12)};font-size:11px">${fmt(s.spi12,' 1J')}</span>`:''}
+                ${s.spi36!==null?`<span style="color:${col(s.spi36)};font-size:11px">${fmt(s.spi36,' 3J')}</span>`:''}
+                ${s.spi60!==null?`<span style="color:${col(s.spi60)};font-size:11px">${fmt(s.spi60,' 5J')}</span>`:''}
+                ${s.spi120!==null?`<span style="color:${col(s.spi120)};font-size:11px">${fmt(s.spi120,' 10J')}</span>`:''}
+                ${s.spiNow!==null?`<span style="color:${col(s.spiNow)};font-size:11px;background:rgba(34,197,94,.08);padding:1px 4px;border-radius:3px">${fmt(s.spiNow,' '+mLabel)}</span>`:''}
+              </div>
             </div>
           </div>`;
         }).join('')}
@@ -807,7 +971,7 @@ function render() {
         <div><span class="tl">S&P 500</span><div class="tv">${d.sp.toLocaleString('de-CH')}</div></div>
         <div><span class="tl">DRAWDOWN</span><div class="tv" style="color:var(--blue)">${d.drawdown.toFixed(1)}%</div></div>
         <div><span class="tl">HYS</span><div class="tv" style="color:var(--orange)">${d.hys!=null?d.hys.toFixed(2)+'%':'–'}</div></div>
-        <div><span class="tl">PCR</span><div class="tv" style="color:var(--purple)">${d.pcr!=null?d.pcr.toFixed(2):'–'}</div></div>
+        <div><span class="tl">PCR Ø10T</span><div class="tv" style="color:var(--purple)">${d===S.data[S.data.length-1]&&S.pcr10d!=null?S.pcr10d.toFixed(2):(d.pcr!=null?d.pcr.toFixed(2):'–')}</div></div>
         <div><span class="tl">SIGNAL</span><div class="tv">${sig}</div></div>`;
     }
   });
@@ -820,46 +984,17 @@ async function init() {
     const res=await fetch(WORKER+'/api/data');
     if(res.ok){
       const live=await res.json();
-      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; render(); applyResponsive();
+      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; S.spi=live.spi??live.smi??null; S.spiYearHigh=live.spiYearHigh??null; S.pcr10d=live.pcr10d??null; render(); applyResponsive();
     }
   } catch(e){}
   setInterval(async()=>{
     try{
       const res=await fetch(WORKER+'/api/data');
-      if(res.ok){const live=await res.json();S.data=buildData(live);S.status='live';S.lastUp=live.fetchedAt;S.hys=live.hys??null;S.pcr=live.pcr??null;render();}
+      if(res.ok){const live=await res.json();S.data=buildData(live);S.status='live';S.lastUp=live.fetchedAt;S.hys=live.hys??null;S.pcr=live.pcr??null;S.spi=live.spi??live.smi??null;S.spiYearHigh=live.spiYearHigh??null;S.pcr10d=live.pcr10d??null;render();}
     }catch(e){}
   }, CACHE_MS);
 }
-window.init = init;
-</script>
-<div id="pw-overlay">
-  <div class="pw-box">
-    <div class="pw-logo">📊</div>
-    <div class="pw-title">Antizyklisches Einstiegssignal</div>
-    <div class="pw-sub">Bitte Passwort eingeben um fortzufahren</div>
-    <input id="pw-input" class="pw-input" type="password" placeholder="Passwort" autocomplete="current-password"
-      onkeydown="if(event.key==='Enter') doLogin()">
-    <button class="pw-btn" onclick="doLogin()">Zugang</button>
-    <div class="pw-err" id="pw-err"></div>
-  </div>
-</div>
-
-<script>
-function doLogin() {
-  const val = document.getElementById('pw-input').value;
-  if (val === 'richtiganlegen') {
-    document.getElementById('pw-overlay').style.display = 'none';
-    document.getElementById('app').style.display = '';
-    init();
-  } else {
-    document.getElementById('pw-err').textContent = 'Falsches Passwort';
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
-  }
-}
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('pw-input').focus();
-});
+// init() wird nach Login aufgerufen
 </script>
 
 <script>
