@@ -67,9 +67,57 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   .btn{border-radius:4px;padding:6px 14px;font-size:11px;font-family:var(--font);cursor:pointer;transition:all .2s;border:1px solid var(--border);background:transparent;color:var(--muted)}
   .btn.ac{background:rgba(255,255,255,.1);border-color:var(--fg);color:var(--fg);font-weight:600}
+
+  .login-overlay {
+    position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;z-index:9999;
+  }
+  .login-box {
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:40px;max-width:400px;width:90%;text-align:center;
+  }
+  .login-box h2 {
+    font-size:18px;font-weight:700;margin-bottom:8px;
+    background:linear-gradient(135deg,#e2e8f0,#94a3b8);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .login-box p { font-size:12px;color:var(--muted);margin-bottom:24px; }
+  .login-box input[type=password] {
+    width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);
+    border-radius:6px;color:var(--fg);font-family:var(--font);font-size:14px;
+    margin-bottom:16px;outline:none;transition:border-color .2s;
+  }
+  .login-box input[type=password]:focus { border-color:var(--amber); }
+  .login-box button {
+    width:100%;padding:12px;background:var(--amber);color:#000;border:none;
+    border-radius:6px;font-family:var(--font);font-size:13px;font-weight:700;
+    cursor:pointer;transition:opacity .2s;
+  }
+  .login-box button:hover { opacity:.85; }
+  .login-error {
+    color:var(--red);font-size:11px;margin-top:8px;display:none;
+  }
+  .login-logo {
+    font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  #dashboard-content { display:none; }
 </style>
 </head>
 <body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">RichtigAnlegen AG</div>
+    <h2>Antizyklisches Einstiegssignal</h2>
+    <p>Exklusiv fuer Beratungskunden</p>
+    <input type="password" id="pwInput" placeholder="Passwort eingeben" autofocus>
+    <button onclick="checkPw()">Zugang</button>
+    <div class="login-error" id="loginError">Falsches Passwort</div>
+  </div>
+</div>
+<div id="dashboard-content">
+
 <div class="c" id="app"><div class="ld">Lade Live-Daten</div></div>
 <script>
 // ============================================================
@@ -311,5 +359,33 @@ async function init() {
 
 init();
 </script>
+
+</div>
+
+<script>
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPw(){
+  const pw=document.getElementById('pwInput').value;
+  const hash=await sha256(pw);
+  if(hash==='3fc821ccdfb5437c67680b34889d4ca82e39ada8999c99b0dfda9368a49138cf'){
+    document.getElementById('loginOverlay').style.display='none';
+    document.getElementById('dashboard-content').style.display='block';
+    sessionStorage.setItem('sd_auth','1');
+  }else{
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+if(sessionStorage.getItem('sd_auth')==='1'){
+  document.getElementById('loginOverlay').style.display='none';
+  document.getElementById('dashboard-content').style.display='block';
+}
+</script>
+
 </body>
 </html>
