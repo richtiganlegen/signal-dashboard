@@ -487,23 +487,35 @@ const H_DATA = [
   {d:"2026-06",fg:28,vix:22.2,sp:7267,hys:2.78,pcr:0.83,spi:19011,spTr:16245,spTrChf:12972,spDdMax:-4.6,spiDdMax:-1.6}
 ];
 
-let S = { data:[], tr:'all', tr2:'all', spiYearHigh:null, pcr10d:null, status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null, spi:null, spiDd:null };
+let S = { data:[], hist:[], live:null, tr:'all', tr2:'all', spiYearHigh:null, pcr10d:null, status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null, spi:null, spiDd:null, warn:[] };
 
-function buildData(live) {
-  const rows = H_DATA.map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp, hys:h.hys||null, pcr:h.pcr||null, spi:h.spi||null, spTr:h.spTr||null, spTrChf:h.spTrChf||null, spDdMax:h.spDdMax??null, spiDdMax:h.spiDdMax??null}));
+function buildData(live, hist) {
+  // Basis: statische Historie; Monate aus dem Worker (/api/history) ersetzen bzw. ergänzen sie
+  const map = new Map();
+  H_DATA.forEach(h => map.set(h.d, h));
+  (hist||[]).forEach(h => { if (h && h.d && h.sp) map.set(h.d, {...map.get(h.d), ...Object.fromEntries(Object.entries(h).filter(([k,v])=>v!=null))}); });
+  const rows = [...map.values()].sort((a,b)=>a.d.localeCompare(b.d)).map(h => ({date:h.d, fg:h.fg, vix:h.vix, sp:h.sp, hys:h.hys||null, pcr:h.pcr||null, spi:h.spi||null, spTr:h.spTr||null, spTrChf:h.spTrChf||null, spDdMax:h.spDdMax??null, spiDdMax:h.spiDdMax??null}));
   if (live) {
-    const last = rows[rows.length-1];
+    const month = (live.fetchedAt||new Date().toISOString()).slice(0,7);
+    let last = rows[rows.length-1];
+    if (last.date !== month) { last = {...last, date:month}; rows.push(last); }
     if (live.fearGreed != null) last.fg = live.fearGreed;
     if (live.vix != null) last.vix = live.vix;
     if (live.sp500 != null) last.sp = live.sp500;
     if (live.hys != null) last.hys = live.hys;
-    if (live.pcr != null) last.pcr = live.pcr;
+    if (live.pcr10d != null) last.pcr = live.pcr10d; else if (live.pcr != null) last.pcr = live.pcr;
     if (live.spi != null) last.spi = live.spi;
     if (live.spTr != null) last.spTr = live.spTr;
     if (live.spTrChf != null) last.spTrChf = live.spTrChf;
   }
   let ath = 0;
-  return rows.map(d => { if(d.sp>ath) ath=d.sp; return {...d, drawdown:((d.sp-ath)/ath)*100, ath}; });
+  const out = rows.map(d => { if(d.sp>ath) ath=d.sp; return {...d, drawdown:((d.sp-ath)/ath)*100, ath}; });
+  // Aktueller Drawdown: gleiche Basis wie der Worker (Allzeithoch auf Tagesschlusskurs)
+  if (live && live.sp500Ath && live.sp500) {
+    const c = out[out.length-1], a = Math.max(c.ath, live.sp500Ath);
+    c.ath = a; c.drawdown = ((c.sp - a) / a) * 100;
+  }
+  return out;
 }
 
 function fwdRet(data, idx, months, field) {
@@ -685,7 +697,7 @@ function render() {
     <div class="hl">Antizyklisches Investitions-System</div>
     <h1>3-Tranchen Einstiegsstrategie</h1>
     <p class="sub">Gestaffelt investieren bei Marktkorrekturen · Fear &amp; Greed · VIX · S&amp;P 500 Drawdown</p>
-    <div class="ui"><div class="ud ${sD}"></div><div class="ut">${sT}${S.lastUp?' · Update: '+new Date(S.lastUp).toLocaleString('de-CH'):''}</div></div>
+    <div class="ui"><div class="ud ${sD}"></div><div class="ut">${sT}${S.lastUp?' · Update: '+new Date(S.lastUp).toLocaleString('de-CH'):''}${S.warn&&S.warn.length?' · <span style="color:var(--amber)" title="'+S.warn.join(' | ').replace(/"/g,'')+'">Hinweis: '+S.warn.length+' Datenquelle(n) aktuell nicht verfügbar, letzter gültiger Wert wird verwendet</span>':''}</div></div>
 
     <div class="tranchen">${tranchenHTML}</div>
 
@@ -719,12 +731,12 @@ function render() {
     </div>
 
     <div class="smi-box">
-      <div class="smi-title">🇨🇭 SPI Total Return (SNB-Daten) — Zusatzinfo</div>
+      <div class="smi-title">🇨🇭 SPI (Total Return) · Zusatzinfo</div>
       <div class="smi-grid">
         <div class="smi-card">
           <div class="lb">Aktueller Stand</div>
           <div class="vl" style="color:var(--fg)">${S.spi!=null?S.spi.toLocaleString('de-CH'):'–'}</div>
-          <div class="th">Punkte (SPI Total Return, von SIX)</div>
+          <div class="th">Punkte (SPI, Quelle SIX)</div>
         </div>
         <div class="smi-card ${S.spiDd!=null&&S.spiDd<-10?'smi-signal':''}">
           <div class="lb">Drawdown vom letzten Hoch (ATH)</div>
@@ -947,21 +959,26 @@ function render() {
   ch?.addEventListener('mouseleave',()=>{tt.className='tb';});
 }
 
+function applyLive(live) {
+  S.live=live; S.data=buildData(live, S.hist); S.status='live'; S.lastUp=live.fetchedAt;
+  S.hys=live.hys??null; S.pcr=live.pcr??null; S.spi=live.spi??null;
+  S.spiYearHigh=live.spiAth??live.spiYearHigh??null; S.pcr10d=live.pcr10d??null;
+  S.warn=(live.errors||[]);
+}
+async function loadHist() {
+  try { const r=await fetch(WORKER+'/api/history'); if(r.ok){ const h=await r.json(); if(Array.isArray(h)) S.hist=h; } } catch(e){}
+}
+async function loadLive() {
+  try { const r=await fetch(WORKER+'/api/data'); if(r.ok){ applyLive(await r.json()); return true; } } catch(e){}
+  return false;
+}
 async function init() {
-  S.data=buildData(null); S.status='stale'; render();
-  try {
-    const res=await fetch(WORKER+'/api/data');
-    if(res.ok){
-      const live=await res.json();
-      S.data=buildData(live); S.status='live'; S.lastUp=live.fetchedAt; S.hys=live.hys??null; S.pcr=live.pcr??null; S.spi=live.spi??live.smi??null; S.spiYearHigh=live.spiYearHigh??null; S.pcr10d=live.pcr10d??null; render(); applyResponsive();
-    }
-  } catch(e){}
-  setInterval(async()=>{
-    try{
-      const res=await fetch(WORKER+'/api/data');
-      if(res.ok){const live=await res.json();S.data=buildData(live);S.status='live';S.lastUp=live.fetchedAt;S.hys=live.hys??null;S.pcr=live.pcr??null;S.spi=live.spi??live.smi??null;S.spiYearHigh=live.spiYearHigh??null;S.pcr10d=live.pcr10d??null;render();}
-    }catch(e){}
-  }, CACHE_MS);
+  S.data=buildData(null, null); S.status='stale'; render();
+  await Promise.all([loadHist(), loadLive()]);
+  if(S.status!=='live') S.data=buildData(null, S.hist);
+  render(); if(typeof applyResponsive==='function') applyResponsive();
+  setInterval(async()=>{ if(await loadLive()) render(); }, CACHE_MS);
+  setInterval(async()=>{ await loadHist(); if(S.live) S.data=buildData(S.live, S.hist); render(); }, 6*60*60*1000);
 }
 init();
 </script>
