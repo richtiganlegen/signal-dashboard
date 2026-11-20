@@ -161,8 +161,8 @@ const WORKER = 'https://signal-dashboard.blue-hill-33fd.workers.dev';
 const CACHE_MS = 5 * 60 * 1000;
 
 const TRANCHEN = [
-  { nr:1, pct:20, cls:'t1', spDD:-10, vixMin:25, fgMax:25, hysMin:4.0, pcrMin:0.90, desc:'Erste Investition – Korrektur beginnt' },
-  { nr:2, pct:40, cls:'t2', spDD:-15, vixMin:30, fgMax:10, hysMin:5.0, pcrMin:1.00, desc:'Aufstocken – deutliche Korrektur' },
+  { nr:1, pct:20, cls:'t1', spDD:-10, vixMin:25, fgMax:25, hysMin:3.5, pcrMin:0.90, desc:'Erste Investition – Korrektur beginnt' },
+  { nr:2, pct:40, cls:'t2', spDD:-15, vixMin:30, fgMax:10, hysMin:4.5, pcrMin:1.00, desc:'Aufstocken – deutliche Korrektur' },
   { nr:3, pct:40, cls:'t3', spDD:-20, vixMin:40, fgMax:5,  hysMin:7.0, pcrMin:1.10, desc:'Vollinvestition – Panik am Markt' },
 ];
 
@@ -720,7 +720,7 @@ function render() {
         {l:'Fear & Greed',fmt:String(cur.fg),t:'< 25 / 10 / 5',m:cur.fg<25,c:'var(--amber)'},
         {l:'VIX',fmt:cur.vix.toFixed(2),t:'> 25 / 30 / 40',m:cur.vix>25,c:'var(--red)'},
         {l:'S&P 500 Drawdown',fmt:cur.drawdown.toFixed(2)+'%',t:'> 10% / 15% / 20%',m:cur.drawdown<-10,c:'var(--blue)'},
-        {l:'High-Yield Spread',fmt:S.hys!=null?S.hys.toFixed(2)+'%':'–',t:'> 4 / 5 / 7%',m:S.hys!=null&&S.hys>4.0,c:'var(--orange)'},
+        {l:'High-Yield Spread',fmt:S.hys!=null?S.hys.toFixed(2)+'%':'–',t:'> 3.5 / 4.5 / 7%',m:S.hys!=null&&S.hys>TRANCHEN[0].hysMin,c:'var(--orange)'},
         {l:'Put/Call Ratio (Ø 10 Tage)',fmt:S.pcr10d!=null?S.pcr10d.toFixed(2):'–',t:'Ø > 0.90 / 1.00 / 1.10',m:S.pcr10d!=null&&S.pcr10d>=0.90,c:'var(--purple)'}
       ].map(c=>`<div class="sc ${c.m?'m':''}">
         <div class="lb">${c.l}</div>
@@ -781,7 +781,7 @@ function render() {
         <div class="info-card">
           <div class="info-card-title" style="color:var(--orange)">High-Yield Spread</div>
           <div class="info-card-text">Zinsaufschlag von US-Hochzinsanleihen („Junk Bonds“) gegenüber US-Staatsanleihen. Steigt der Spread, signalisiert das Kreditstress und erhöhtes Ausfallrisiko in der Wirtschaft. Ein Spread &gt;5% zeigt echten Kreditmarkt-Stress – unabhängig vom Aktienmarkt.</div>
-          <div class="info-card-signal" style="background:rgba(251,146,60,.15);color:var(--orange)">Signal: &gt; 4 / 5 / 7%</div>
+          <div class="info-card-signal" style="background:rgba(251,146,60,.15);color:var(--orange)">Signal: &gt; 3.5 / 4.5 / 7%</div>
         </div>
         <div class="info-card">
           <div class="info-card-title" style="color:var(--purple)">Put/Call Ratio</div>
@@ -803,8 +803,8 @@ function render() {
       <path d="${spArea}" fill="rgba(148,163,184,.05)" stroke="none"/>
       ${(()=>{const smiPts=data.filter(d=>d.spi!=null);if(smiPts.length<2)return '';const mnS=Math.min(...smiPts.map(d=>d.spi)),mxS=Math.max(...smiPts.map(d=>d.spi));const yS=v=>pT+pH-((v-mnS)/(mxS-mnS)*pH*0.85);const path=smiPts.reduce((s,d)=>{const x=xS(data.indexOf(d)),y=yS(d.spi).toFixed(1);return s+(s===''?`M${x.toFixed(1)},${y}`:`L${x.toFixed(1)},${y}`)},'');return `<path d="${path}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.2" stroke-dasharray="3,2"/>`;})()} 
       <path d="${mkP(d=>ySP(d.sp))}" fill="none" stroke="rgba(148,163,184,.38)" stroke-width="1.5" stroke-dasharray="4,2"/>
-      <line x1="${pL}" x2="${W-pR}" y1="${yH(4).toFixed(1)}" y2="${yH(4).toFixed(1)}" stroke="var(--orange)" stroke-dasharray="2,3" opacity=".35"/>
-      <text x="${W-pR+5}" y="${(yH(4)+3).toFixed(1)}" fill="var(--orange)" font-size="8" opacity=".6">4%</text>
+      <line x1="${pL}" x2="${W-pR}" y1="${yH(3.5).toFixed(1)}" y2="${yH(3.5).toFixed(1)}" stroke="var(--orange)" stroke-dasharray="2,3" opacity=".35"/>
+      <text x="${W-pR+5}" y="${(yH(3.5)+3).toFixed(1)}" fill="var(--orange)" font-size="8" opacity=".6">3.5%</text>
       <line x1="${pL}" x2="${W-pR}" y1="${yP(0.90).toFixed(1)}" y2="${yP(0.90).toFixed(1)}" stroke="var(--purple)" stroke-dasharray="2,3" opacity=".35"/>
       <text x="${W-pR+5}" y="${(yP(0.90)+3).toFixed(1)}" fill="var(--purple)" font-size="8" opacity=".6">0.9</text>
       <line x1="${pL}" x2="${W-pR}" y1="${yD(-5).toFixed(1)}" y2="${yD(-5).toFixed(1)}" stroke="var(--green)" stroke-dasharray="3,3" opacity=".5"/>
