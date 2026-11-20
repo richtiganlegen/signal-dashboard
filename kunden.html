@@ -11,7 +11,7 @@ body { height: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 :root {
   --bg: #0a0e17; --fg: #e2e8f0; --muted: #64748b;
   --border: rgba(148,163,184,.12); --card: #111827; --card2: #0f172a;
-  --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #60a5fa;
+  --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #60a5fa; --orange: #f472b6; --purple: #a78bfa;
   --font: 'Inter', system-ui, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -152,6 +152,20 @@ svg { display: block; width: 100%; }
 .smi-card { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
 .smi-card.smi-signal { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.04); }
 @media (max-width: 640px) { .smi-grid { grid-template-columns: 1fr; } }
+
+/* ── Mobile: Legenden unter dem Chart, Signal-Renditen über volle Breite ── */
+.lg-html { display: none; flex-wrap: wrap; gap: 6px 12px; padding: 8px 4px 2px; font-size: 11px; color: var(--muted); }
+.lg-html span { display: inline-flex; align-items: center; gap: 5px; }
+.lg-html i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.sg > :nth-child(3) { grid-column: 1 / -1; padding-left: 78px; }
+@media (max-width: 700px) {
+  .lg-svg { display: none; }
+  .lg-html { display: flex; }
+  .sg { grid-template-columns: 1fr; gap: 4px; }
+  .sg > :nth-child(3) { padding-left: 0; }
+  .sret { display: flex !important; flex-direction: row !important; gap: 4px 8px !important; }
+  .sret span:first-child { min-width: 0 !important; width: 100%; }
+}
 /* ── Passwort-Gate ── */
 #pw-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .pw-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 40px; width: 340px; max-width: 86vw; text-align: center; box-sizing: border-box; }
@@ -508,7 +522,8 @@ const H_DATA = [
   {d:"2026-06",fg:28,vix:22.2,sp:7267,hys:2.78,pcr:0.83,spi:19011,spTr:16245,spTrChf:12972,spDdMax:-4.6,spiDdMax:-1.6}
 ];
 
-let S = { data:[], hist:[], live:null, tr:'all', tr2:'all', spiYearHigh:null, pcr10d:null, status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null, spi:null, spiDd:null, warn:[] };
+const NARROW = (window.innerWidth||1000) < 700;
+let S = { data:[], hist:[], live:null, tr:NARROW?'5y':'all', tr2:NARROW?'10y':'all', spiYearHigh:null, pcr10d:null, status:'loading', lastUp:null, kapital:100000, hys:null, pcr:null, spi:null, spiDd:null, warn:[] };
 
 function buildData(live, hist) {
   // Basis: statische Historie; Monate aus dem Worker (/api/history) ersetzen bzw. ergänzen sie
@@ -802,7 +817,7 @@ function render() {
         <div class="info-card">
           <div class="info-card-title" style="color:var(--orange)">High-Yield Spread</div>
           <div class="info-card-text">Zinsaufschlag von US-Hochzinsanleihen („Junk Bonds“) gegenüber US-Staatsanleihen. Steigt der Spread, signalisiert das Kreditstress und erhöhtes Ausfallrisiko in der Wirtschaft. Ein Spread &gt;5% zeigt echten Kreditmarkt-Stress – unabhängig vom Aktienmarkt.</div>
-          <div class="info-card-signal" style="background:rgba(251,146,60,.15);color:var(--orange)">Signal: &gt; 3.5 / 4.5 / 7%</div>
+          <div class="info-card-signal" style="background:rgba(244,114,182,.15);color:var(--orange)">Signal: &gt; 3.5 / 4.5 / 7%</div>
         </div>
         <div class="info-card">
           <div class="info-card-title" style="color:var(--purple)">Put/Call Ratio</div>
@@ -841,9 +856,9 @@ function render() {
       <path d="${mkP(d=>yD(d.drawdown))}" fill="none" stroke="var(--blue)" stroke-width="1" opacity=".35" stroke-dasharray="2,2"/>
       <path d="${data.filter(d=>d.spDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS(data.indexOf(d)).toFixed(1)+','+yD(d.spDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.5" opacity=".9"/>
       ${bs1.map(s=>`<circle cx="${xS(s.i).toFixed(1)}" cy="${yD(s.drawdown).toFixed(1)}" r="${tActive(s,TRANCHEN[2])?7:tActive(s,TRANCHEN[1])?6:4}" fill="${tActive(s,TRANCHEN[2])?'var(--red)':tActive(s,TRANCHEN[1])?'var(--amber)':'var(--green)'}" stroke="#0a0e17" stroke-width="1.5"/>`).join('')}
-      ${yrs.map(yl=>`<text x="${xS(yl.i).toFixed(1)}" y="${HH-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
+      ${yrs.filter((yl,k,a)=>{const st=Math.max(1,Math.ceil(a.length*34/pW));if(k%st)return false;const nx=a[k+st];return !nx||xS(nx.i)-xS(yl.i)>=30;}).map(yl=>`<text x="${xS(yl.i).toFixed(1)}" y="${HH-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
       ${[0,-5,-10,-15,-20].filter(v=>v>=mD-2).map(v=>`<text x="${W-pR+5}" y="${(yD(v)+3).toFixed(1)}" fill="rgba(96,165,250,.5)" font-size="8">${v}%</text>`).join('')}
-      <g transform="translate(${pL+8},${pT+8})">
+      <g class="lg-svg" transform="translate(${pL+8},${pT+8})">
         <rect x="-4" y="-8" width="210" height="110" fill="rgba(10,14,23,.9)" rx="4"/>
         <circle cx="4" cy="0" r="4" fill="var(--blue)"/><text x="13" y="4" fill="var(--blue)" font-size="10">S&amp;P 500 DD (TR)</text>
         <circle cx="4" cy="16" r="4" fill="var(--amber)"/><text x="13" y="20" fill="var(--amber)" font-size="10">Fear &amp; Greed Index</text>
@@ -854,7 +869,8 @@ function render() {
         <circle cx="4" cy="80" r="4" fill="var(--purple)"/><text x="13" y="84" fill="var(--purple)" font-size="10">Put/Call Ratio</text>
         <line x1="0" x2="8" y1="96" y2="96" stroke="rgba(255,255,255,.35)" stroke-width="1.2" stroke-dasharray="3,2"/><text x="13" y="100" fill="rgba(255,255,255,.35)" font-size="10">SPI Total Return</text>
       </g>
-    </svg></div>
+    </svg>
+    <div class="lg-html"><span><i style="background:var(--blue)"></i>S&amp;P 500 DD (TR)</span><span><i style="background:var(--amber)"></i>Fear &amp; Greed</span><span><i style="background:var(--red)"></i>VIX</span><span><i style="background:rgba(148,163,184,.6);height:2px"></i>S&amp;P 500 Kurs</span><span><i style="background:var(--orange)"></i>High-Yield Spread</span><span><i style="background:var(--purple)"></i>Put/Call Ratio</span><span><i style="background:rgba(255,255,255,.5);height:2px"></i>SPI</span></div></div>
 
     <div class="tb" id="tt"></div>
 
@@ -876,9 +892,9 @@ function render() {
       <path d="${data2.filter(d=>d.spi!=null).map((d,i)=>{const vals=data2.filter(x=>x.spi!=null).map(x=>x.spi/spiBase2*100);const mn=Math.min(...vals),mx=Math.max(...vals);const yF=v=>pT+(mx-v)/(mx-mn)*pH2*0.75+pH2*0.12;return (i===0?'M':'L')+xS2(data2.filter(x=>x.spi!=null).indexOf(d)).toFixed(1)+','+yF(d.spi/spiBase2*100).toFixed(1);}).join(' ')}" fill="none" stroke="rgba(34,197,94,.45)" stroke-width="1.5" stroke-dasharray="5,3"/>
       <path d="${data2.filter(d=>d.spDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS2(data2.indexOf(d)).toFixed(1)+','+yD2(d.spDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.5" opacity=".9"/>
       <path d="${data2.filter(d=>d.spiDdMax!=null).map((d,i,a)=>(i===0?'M':'L')+xS2(data2.indexOf(d)).toFixed(1)+','+yD2(d.spiDdMax).toFixed(1)).join(' ')}" fill="none" stroke="var(--green)" stroke-width="2.5" opacity=".9"/>
-      ${yrs2.map(yl=>`<text x="${xS2(yl.i).toFixed(1)}" y="${HH2-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
+      ${yrs2.filter((yl,k,a)=>{const st=Math.max(1,Math.ceil(a.length*34/pW));if(k%st)return false;const nx=a[k+st];return !nx||xS2(nx.i)-xS2(yl.i)>=30;}).map(yl=>`<text x="${xS2(yl.i).toFixed(1)}" y="${HH2-pB+18}" text-anchor="middle" fill="var(--muted)" font-size="10">${yl.y}</text>`).join('')}
       ${[0,-10,-20,-30,-40,-50].filter(v=>v>=mD2-5).map(v=>`<text x="${W-pR+5}" y="${(yD2(v)+3).toFixed(1)}" fill="rgba(148,163,184,.4)" font-size="8">${v}%</text>`).join('')}
-      <g transform="translate(${pL+8},${pT+8})">
+      <g class="lg-svg" transform="translate(${pL+8},${pT+8})">
         <rect x="-4" y="-8" width="255" height="102" fill="rgba(10,14,23,.92)" rx="4"/>
         <circle cx="4" cy="0" r="5" fill="var(--blue)"/><text x="15" y="4" fill="var(--blue)" font-size="10" font-weight="600">S&amp;P 500 TR Drawdown (CHF)</text>
         <line x1="0" x2="10" y1="16" y2="16" stroke="rgba(96,165,250,.6)" stroke-width="2" stroke-dasharray="4,2"/><text x="15" y="20" fill="rgba(96,165,250,.6)" font-size="10">S&amp;P 500 TR Kurs normiert (CHF)</text>
@@ -888,7 +904,8 @@ function render() {
         <text x="0" y="80" fill="rgba(148,163,184,.4)" font-size="9">2000–2026: S&amp;P TR CHF +275% vs SPI TR +268%</text>
         <text x="0" y="92" fill="rgba(245,158,11,.35)" font-size="8">⚠ Historik auf Monatsbasis — Intramonats-DD unterschätzt</text>
       </g>
-    </svg></div>
+    </svg>
+    <div class="lg-html"><span><i style="background:var(--blue)"></i>S&amp;P 500 TR Drawdown (CHF)</span><span><i style="background:rgba(96,165,250,.6);height:2px"></i>S&amp;P 500 TR normiert</span><span><i style="background:var(--green)"></i>SPI TR Drawdown (CHF)</span><span><i style="background:rgba(34,197,94,.6);height:2px"></i>SPI TR normiert</span></div></div>
 
 
     <div class="sb">
